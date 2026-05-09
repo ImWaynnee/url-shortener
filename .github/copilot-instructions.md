@@ -6,10 +6,10 @@
 </ProjectLayout>
 
 <BuildInstructions>
-- Always run `npm install` from the root (workspaces).
-- Backend: `npm run start:dev -w backend`.
-- Database: `npx prisma migrate dev` after schema changes.
-- Tests: `npm run test -w backend`.
+- Always run `pnpm install` from the root (workspaces).
+- Backend: `docker compose up --build -d`.
+- Database: `pnpm --filter backend migrate:dev` after schema changes.
+- TODO :: Tests: `pnpm --filter backend test`.
 </BuildInstructions>
 
 # Memory Rule

@@ -1,0 +1,69 @@
+version: '3.8'
+name: 'urlshortener-backend'
+services:
+  backend:
+    container_name: urlshortener_backend
+    build:
+      context: .
+      dockerfile: backend/docker/Dockerfile.dev
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    expose:
+      - '3000'
+    volumes:
+      # mount source so nest --watch picks up changes
+      - ./backend/src:/app/backend/src
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - urlshortener_network
+
+  nginx:
+    container_name: urlshortener_nginx
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    volumes:
+      - ./infra/nginx.dev.conf.template:/etc/nginx/templates/default.conf.template:ro
+    environment:
+      - NGINX_API_HOST=${NGINX_API_HOST}
+      - NGINX_REDIRECT_HOST=${NGINX_REDIRECT_HOST}
+    depends_on:
+      - backend
+    networks:
+      - urlshortener_network
+      
+  postgres:
+    container_name: urlshortener_postgres
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: urlshortener
+      POSTGRES_USER: urlshortener_user
+      POSTGRES_PASSWORD: example
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - urlshortener_network
+
+  redis:
+    container_name: urlshortener_redis
+    image: redis:7-alpine
+    restart: always
+    command: --requirepass example
+    ports:
+      - '6379:6379'
+    networks:
+      - urlshortener_network
+
+networks:
+  urlshortener_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

@@ -5,3 +5,4 @@ Going further:
 - What scale should we assume this is for?
 - What other features from bit.ly do we want copied?
 - What analytics do we want to collect?
+- Module graph for NestJS (is there a way people automate this?)
