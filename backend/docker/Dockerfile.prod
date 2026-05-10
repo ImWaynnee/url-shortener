@@ -7,10 +7,10 @@ WORKDIR /app
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY backend/package.json backend/prisma.config.ts ./backend/
-COPY backend/prisma ./backend/prisma
 
 RUN pnpm install --filter backend... --frozen-lockfile
 
+COPY backend/prisma ./backend/prisma
 RUN cd backend && npx prisma generate --schema prisma/schema.prisma
 
 COPY backend/src ./backend/src

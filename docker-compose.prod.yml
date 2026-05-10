@@ -1,7 +1,7 @@
-name: 'urlshortener-backend'
+name: 'urlshortener-backend-prod'
 services:
   backend:
-    container_name: urlshortener_backend
+    container_name: urlshortener_backend_prod
     build:
       context: .
       dockerfile: backend/docker/Dockerfile.prod
@@ -17,10 +17,10 @@ services:
       - postgres
       - redis
     networks:
-      - urlshortener_network
+      - urlshortener_network_prod
 
   nginx:
-    container_name: urlshortener_nginx
+    container_name: urlshortener_nginx_prod
     image: nginx:1.27-alpine
     restart: unless-stopped
     ports:
@@ -36,18 +36,18 @@ services:
     depends_on:
       - backend
     networks:
-      - urlshortener_network
+      - urlshortener_network_prod
 
   redis:
-    container_name: urlshortener_redis
+    container_name: urlshortener_redis_prod
     image: redis:7-alpine
     restart: always
     command: ['redis-server', '--requirepass', '${REDIS_PASSWORD}']
     networks:
-      - urlshortener_network
+      - urlshortener_network_prod
 
   postgres:
-    container_name: urlshortener_postgres
+    container_name: urlshortener_postgres_prod
     image: postgres:16-alpine
     restart: always
     environment:
@@ -57,10 +57,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - urlshortener_network
+      - urlshortener_network_prod
 
 networks:
-  urlshortener_network:
+  urlshortener_network_prod:
     driver: bridge
 
 volumes:
