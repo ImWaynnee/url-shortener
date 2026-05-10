@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { nanoid } from 'nanoid';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../../prisma.service';
 import { CreateUrlRequest } from './dto/create-url.dto';
 
 @Injectable()

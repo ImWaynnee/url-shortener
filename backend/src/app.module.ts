@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { PrismaModule } from './prisma/prisma.module';
-import { UrlModule } from './url/url.module';
-import { validate } from './env.validation';
-import { PingModule } from './ping/ping.module';
+import { PrismaModule } from '@prisma/prisma.module';
+import { UrlModule } from '@modules/url/url.module';
+import { validate } from '@config/env.validation';
+import { PingModule } from '@modules/ping/ping.module';
 
 @Module({
   imports: [

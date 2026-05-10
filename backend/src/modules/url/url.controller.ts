@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { CreateUrlRequest } from './dto/create-url.dto';
-import { UrlService } from './url.service';
+import { CreateUrlRequest } from '@modules/url/dto/create-url.dto';
+import { UrlService } from '@modules/url/url.service';
 
 @Controller()
 export class UrlController {

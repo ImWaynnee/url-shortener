@@ -9,6 +9,8 @@ services:
     restart: unless-stopped
     env_file:
       - ./backend/.env
+    environment:
+      - REDIRECT_DOMAIN=${NGINX_REDIRECT_HOST}   # <-- pulls from root .env
     expose:
       - '3000'
     volumes:

@@ -6,3 +6,4 @@ Going further:
 - What other features from bit.ly do we want copied?
 - What analytics do we want to collect?
 - Module graph for NestJS (is there a way people automate this?)
+- Using default nanoid(7), do we want to restrict output character set? etc. alphanumeric only, now its A-Za-z0-9_-

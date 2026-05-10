@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { plainToInstance } from 'class-transformer';
 import { IsNumber, IsOptional, IsString, IsUrl, Matches, Max, Min, validateSync } from 'class-validator';
 

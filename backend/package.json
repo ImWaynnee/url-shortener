@@ -47,20 +47,6 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
-  },
   "pnpm": {
     "overrides": {
       "tmp@<=0.2.3": ">=0.2.4",

@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { UrlService } from './url.service';
-import { PrismaService } from '../prisma.service';
+import { ConfigService } from '@nestjs/config';
+import { UrlService } from '@modules/url/url.service';
+import { PrismaService } from '@src/prisma.service';
 
 const mockPrismaService = {
   url: {
@@ -11,6 +12,14 @@ const mockPrismaService = {
   },
 };
 
+const mockConfigService = {
+  get: jest.fn((key: string, defaultVal?: string) => {
+    if (key === 'REDIRECT_DOMAIN') return 'http://sh.example.com';
+    return defaultVal ?? null;
+  }),
+};
+
+
 describe('UrlService', () => {
   let service: UrlService;
 
@@ -19,6 +28,7 @@ describe('UrlService', () => {
       providers: [
         UrlService,
         { provide: PrismaService, useValue: mockPrismaService },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
@@ -39,12 +49,34 @@ describe('UrlService', () => {
       expect(mockPrismaService.url.create).toHaveBeenCalledWith({
         data: expect.objectContaining({ originalUrl: 'https://example.com' }),
       });
-      expect(result).toHaveProperty('shortUrl');
-      expect(result).toHaveProperty('shortUrl');
+
+      expect(result).toEqual({
+        shortUrl: 'abc1234',
+        originalUrl: 'https://example.com',
+        newUrl: 'http://sh.example.com/abc1234',
+      });
     });
   });
 
   describe('getOriginalUrl', () => {
+    it('should return the original URL when the short code exists', async () => {
+      const mockShortUrl = 'abc1234';
+      const mockOriginalUrl = 'https://example.com';
+      const mockData = {
+        shortUrl: mockShortUrl,
+        originalUrl: mockOriginalUrl,
+      };
+
+      mockPrismaService.url.findUnique.mockResolvedValue(mockData);
+
+      const result = await service.getOriginalUrl(mockShortUrl);
+
+      expect(mockPrismaService.url.findUnique).toHaveBeenCalledWith({
+        where: { shortUrl: mockShortUrl },
+      });
+      expect(result).toEqual(mockOriginalUrl);
+    });
+
     it('should throw NotFoundException when short code does not exist', async () => {
       mockPrismaService.url.findUnique.mockResolvedValue(null);
 
