@@ -1,15 +1,16 @@
 <ProjectLayout>
-- Backend: NestJS in `/backend`. Entry: `main.ts`.
-- Frontend: React/Vite in `/frontend`. Entry: `main.tsx`.
+- Backend: NestJS in `/backend`. Entry: `src/main.ts`.
+- Frontend: React/Vite in `/frontend`. Entry: `src/main.tsx`.
 - DB: PostgreSQL via Prisma. Schema at `/backend/prisma/schema.prisma`.
 - DevOps: EC2/RDS. Nginx config at `/infra/nginx.conf`.
 </ProjectLayout>
 
 <BuildInstructions>
 - Always run `pnpm install` from the root (workspaces).
-- Backend: `docker compose up --build -d`.
-- Database: `pnpm --filter backend migrate:dev` after schema changes.
-- TODO :: Tests: `pnpm --filter backend test`.
+- Backend build docker container in dev: `pnpm dev:backend`.
+- Backend tests: `pnpm --filter backend test`.
+- Frontend dev server: `pnpm dev:frontend`.
+- Create database migration if schema changes: `pnpm --filter backend migrate:dev`.
 </BuildInstructions>
 
 # Memory Rule

@@ -1,4 +1,4 @@
-import UrlShortener from './components/UrlShortener';
+import UrlShortener from '@components/UrlShortener';
 
 export default function App() {
   return (

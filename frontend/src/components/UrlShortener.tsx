@@ -1,10 +1,18 @@
-import { useState } from 'react';
+import { env } from '@config/env';
 import axios from 'axios';
+import { useState } from 'react';
 
 interface ShortenResponse {
   shortUrl: string;
   originalUrl: string;
-  shortUrl: string;
+  newUrl: string;
+}
+
+function normalizeUrl(value: string): string {
+  if (!/^https?:\/\//i.test(value)) {
+    return `https://${value}`;
+  }
+  return value;
 }
 
 function isValidUrl(value: string): boolean {
@@ -27,20 +35,33 @@ export default function UrlShortener() {
     setError('');
     setResult(null);
 
-    if (!isValidUrl(inputUrl)) {
-      setError('Please enter a valid URL including http:// or https://');
+    const normalized = normalizeUrl(inputUrl.trim());
+
+    if (!isValidUrl(normalized)) {
+      setError('Please enter a valid URL');
       return;
     }
 
     setLoading(true);
     try {
       const { data } = await axios.post<ShortenResponse>(
-        `${import.meta.env.VITE_API_BASE_URL}/urls/shorten`,
-        { url: inputUrl },
+        `${env.apiBaseUrl}/urls/shorten`,
+        { url: normalized },
       );
       setResult(data);
-    } catch {
-      setError('Something went wrong. Please try again.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const messages: string | string[] | undefined = err.response?.data?.message;
+        if (Array.isArray(messages) && messages.length > 0) {
+          setError(messages[0]);
+        } else if (typeof messages === 'string') {
+          setError(messages);
+        } else {
+          setError('Something went wrong. Please try again.');
+        }
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -57,7 +78,7 @@ export default function UrlShortener() {
     <div className="w-full max-w-lg bg-white rounded-2xl shadow-lg p-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">URL Shortener</h1>
       <p className="text-gray-500 mb-6">
-        Paste a long URL and get a short one instantly.
+        Paste any URL and get a short one instantly.
       </p>
 
       <div className="flex gap-2">
@@ -66,7 +87,7 @@ export default function UrlShortener() {
           value={inputUrl}
           onChange={(e) => setInputUrl(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleShorten()}
-          placeholder="https://example.com/very/long/url"
+          placeholder="https://www.example.com/very/long/url"
           className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
@@ -78,19 +99,21 @@ export default function UrlShortener() {
         </button>
       </div>
 
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      <div className="mt-3 min-h-[1.25rem]">
+        {error && <p className="text-sm text-red-600">{error}</p>}
+      </div>
 
       {result && (
-        <div className="mt-5 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <p className="text-xs text-gray-500 mb-1">Your shortened URL</p>
           <div className="flex items-center gap-2">
             <a
-              href={result.shortUrl}
+              href={result.newUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 font-medium text-sm hover:underline truncate flex-1"
             >
-              {result.shortUrl}
+              {result.newUrl.replace(/^https?:\/\//, '')}
             </a>
             <button
               onClick={handleCopy}

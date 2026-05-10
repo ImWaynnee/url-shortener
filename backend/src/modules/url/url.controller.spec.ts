@@ -37,7 +37,7 @@ describe('UrlController', () => {
       const serviceResult = {
         shortUrl: 'abc1234',
         originalUrl: 'https://example.com',
-        newUrl: 'http://sh-dev.wyzwyz.xyz/abc1234',
+        newUrl: 'http://sh-local.wyzwyz.xyz/abc1234',
       };
       mockUrlService.createShortUrl.mockResolvedValue(serviceResult);
 

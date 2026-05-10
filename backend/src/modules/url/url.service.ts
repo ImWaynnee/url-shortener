@@ -35,7 +35,7 @@ export class UrlService {
     return {
       shortUrl: url.shortUrl,
       originalUrl: url.originalUrl,
-      newUrl: `${this.config.get('REDIRECT_DOMAIN', 'http://sh-dev.wyzwyz.xyz')}/${url.shortUrl}`,
+      newUrl: `${this.config.get('REDIRECT_DOMAIN', 'http://sh-local.wyzwyz.xyz')}/${url.shortUrl}`,
     };
   }
 

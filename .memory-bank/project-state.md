@@ -23,23 +23,14 @@ AWS EC2 — Nginx (two server blocks)
 AWS RDS PostgreSQL
 
 Local dev equivalents (Cloudflare DNS A records → 127.0.0.1, proxied through Docker Nginx):
-  sh-api-dev.wyzwyz.xyz  → API
-  sh-dev.wyzwyz.xyz      → Redirects
+  sh-api-local.wyzwyz.xyz  → API
+  sh-local.wyzwyz.xyz      → Redirects
 
 Subdomain separation rationale:
   sh-api.*  = all reads/writes via the frontend (shorten, ping, future CRUD)
   sh.*      = ALWAYS a redirect, no other routes — zero path collision risk
 
 ## Decision Log
-
-### [2026-05-09] Routing: subdomain-based (not path-prefix)
-- Why: Path-prefix routing (/api/*) risks colliding with short codes that begin with "api" (e.g. /apifoo). Subdomain routing eliminates all ambiguity.
-- How: Two Nginx server blocks — sh-api.wyzwyz.xyz (API) and sh.wyzwyz.xyz (redirects only).
-- sh-api.* handles ALL API traffic — frontend always calls this explicitly.
-- sh.* is ONLY ever used for short-link redirects (GET /:shortUrl → 302). No other routes exist here.
-- NestJS has no global prefix; routes are /urls/shorten, /ping, etc.
-- VITE_API_BASE_URL = https://sh-api.wyzwyz.xyz
-- Frontend served from url.wyzwyz.xyz (Cloudflare Pages).
 
 ### [2026-05-08] Short code generation: nanoid(7)
 - Use nanoid to generate and ensure we have auto-retry upon collisions.
@@ -50,5 +41,28 @@ Subdomain separation rationale:
 - How: Static React build deployed from Git repo to Cloudflare Pages
 - Wiring: `VITE_API_BASE_URL` env var in Cloudflare dashboard → EC2 backend URL
 
+
 ### [2026-05-08] CORS: explicit origins only
 - NestJS main.ts origin: [FRONTEND_URL env var (url.wyzwyz.xyz in prod), 'http://localhost:7777']
+
+### [2026-05-09] Routing: subdomain-based (not path-prefix)
+- Why: Path-prefix routing (/api/*) risks colliding with short codes that begin with "api" (e.g. /apifoo). Subdomain routing eliminates all ambiguity.
+- How: Two Nginx server blocks — sh-api.wyzwyz.xyz (API) and sh.wyzwyz.xyz (redirects only).
+- sh-api.* handles ALL API traffic — frontend always calls this explicitly.
+- sh.* is ONLY ever used for short-link redirects (GET /:shortUrl → 302). No other routes exist here.
+- NestJS has no global prefix; routes are /urls/shorten, /ping, etc.
+- VITE_API_BASE_URL = https://sh-api.wyzwyz.xyz
+- Frontend served from url.wyzwyz.xyz (Cloudflare Pages).
+
+### [2026-05-10] ESLint: flat config (eslint.config.js) in each package, shared base via eslint.base.js at root
+- Backend and frontend each have their own eslint.config.js; shared formatting rules live in eslint.base.js (not eslint.config.js, to avoid ESLint auto-discovery treating it as a flat config).
+- We are using VS Code, make sure .vscode/settings.json is set up.
+
+### [2026-05-10] Use path aliases (@src, @components, @config)
+- Frontend: `paths` in `frontend/tsconfig.json` and `resolve.alias` in `vite.config.ts`.
+- Backend: `paths` in `backend/tsconfig.json`
+
+### [2026-05-10] Frontend env: centralised via src/config/env.ts + vite-env.d.ts
+- `vite-env.d.ts` declares `ImportMetaEnv` shape — gives TS types and autocomplete for `VITE_*` vars.
+- `src/config/env.ts` is the single file that reads `import.meta.env`; throws at startup if required vars are missing.
+- Components use `import { env } from @config/env` only.
