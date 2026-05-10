@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
-import { Response } from 'express';
 import { UrlController } from '@modules/url/url.controller';
 import { UrlService } from '@modules/url/url.service';
+import { NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Response } from 'express';
 
 const mockUrlService = {
   createShortUrl: jest.fn(),
@@ -21,7 +21,10 @@ describe('UrlController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UrlController],
-      providers: [{ provide: UrlService, useValue: mockUrlService }],
+      providers: [{
+        provide: UrlService,
+        useValue: mockUrlService 
+      }],
     }).compile();
 
     controller = module.get<UrlController>(UrlController);

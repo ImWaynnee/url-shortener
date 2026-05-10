@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
-import { Response } from 'express';
 import { CreateUrlRequest } from '@modules/url/dto/create-url.dto';
 import { UrlService } from '@modules/url/url.service';
+import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
+import { Response } from 'express';
 
 @Controller()
 export class UrlController {
@@ -12,7 +12,6 @@ export class UrlController {
   async shorten(@Body() dto: CreateUrlRequest) {
     return this.urlService.createShortUrl(dto);
   }
-
 
   @SkipThrottle()
   @Get(':shortUrl')

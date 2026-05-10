@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { UrlService } from '@modules/url/url.service';
 import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UrlService } from '@modules/url/url.service';
+import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '@src/prisma.service';
 
 const mockPrismaService = {
@@ -19,7 +19,6 @@ const mockConfigService = {
   }),
 };
 
-
 describe('UrlService', () => {
   let service: UrlService;
 
@@ -27,8 +26,14 @@ describe('UrlService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UrlService,
-        { provide: PrismaService, useValue: mockPrismaService },
-        { provide: ConfigService, useValue: mockConfigService },
+        {
+          provide: PrismaService,
+          useValue: mockPrismaService 
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService 
+        },
       ],
     }).compile();
 

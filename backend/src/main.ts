@@ -1,11 +1,15 @@
-import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@src/app.module';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  
+  app.use(helmet());
+  app.enableShutdownHooks(); // This allows Nest to listen for termination signals (SIGTERM/SIGINT)
 
   app.enableCors({
     origin: [
@@ -17,7 +21,11 @@ async function bootstrap() {
   });
 
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true 
+    }),
   );
 
   await app.listen(configService.get<number>('PORT') ?? 3000);
