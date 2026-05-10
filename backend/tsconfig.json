@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": ["jest", "node", "express", "pg"],
+    "module": "CommonJS", // NestJS uses CommonJS.
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false,
+    "skipLibCheck": true,
+    "declaration": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "incremental": true,
+    "rootDir": "src",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "paths": {
+      "@src/*": ["./src/*"],
+      "@modules/*": ["./src/modules/*"],
+      "@prisma/*": ["./src/prisma/*"],
+      "@config/*": ["./src/config/*"],
+      "@guards/*": ["./src/common/guards/*"]
+    }
+  },
+  "watchOptions": {
+    "watchFile": "fixedPollingInterval",
+    "watchDirectory": "fixedPollingInterval",
+    "fallbackPolling": "fixedInterval",
+    "synchronousWatchDirectory": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
