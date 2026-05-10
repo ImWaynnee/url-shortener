@@ -10,9 +10,10 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - REDIRECT_DOMAIN=${NGINX_REDIRECT_HOST}   # <-- pulls from root .env
+      - REDIRECT_DOMAIN=${NGINX_REDIRECT_HOST}
+      - PORT=${BACKEND_PORT:-3000}
     expose:
-      - '3000'
+      - '${BACKEND_PORT:-3000}'
     volumes:
       # mount source so nest --watch picks up changes
       - ./backend/src:/app/backend/src
@@ -47,7 +48,7 @@ services:
       POSTGRES_USER: urlshortener_user
       POSTGRES_PASSWORD: example
     ports:
-      - '5432:5432'
+      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -57,9 +58,26 @@ services:
     container_name: urlshortener_redis
     image: redis:7-alpine
     restart: always
-    command: --requirepass example
+    command: ["redis-server", "--requirepass", "example"]
     ports:
-      - '6379:6379'
+      - '${REDIS_PORT:-6379}:6379'
+    networks:
+      - urlshortener_network
+
+  prisma-studio:
+    container_name: urlshortener_prisma_studio
+    build:
+      context: .
+      dockerfile: backend/docker/Dockerfile.dev
+    profiles:
+      - tools
+    env_file:
+      - ./backend/.env
+    ports:
+      - '${PRISMA_STUDIO_PORT:-5555}:5555'
+    command: ['npx', 'prisma', 'studio', '--port', '5555', '--browser', 'none']
+    depends_on:
+      - postgres
     networks:
       - urlshortener_network
 
