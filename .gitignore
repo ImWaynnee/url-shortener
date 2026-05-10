@@ -1,3 +1,46 @@
 /.history
-/node_modules
-/dist
+node_modules/
+dist/
+build/
+
+# Compiled artifacts accidentally output into src/
+backend/src/**/*.js
+backend/src/**/*.js.map
+backend/src/**/*.d.ts
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# TypeScript incremental build
+*.tsbuildinfo
+
+# Generated files
+*.d.ts
+*.js.map
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+
+# Vite cache
+frontend/.vite/
+
+# Jest coverage
+coverage/
+
+# pnpm
+.pnpm-store/
+
+# Prisma
+*/src/generated/prisma/

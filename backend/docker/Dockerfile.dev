@@ -1,0 +1,28 @@
+# Vulnerabilities all fixable by upgrading to the latest version of dependencies. 
+# See: https://hub.docker.com/layers/library/node/22.15-alpine3.20/images/sha256-2b8bb498b4191f37b3c7e58768feddfc8f018a69171790c7f915dbd59448bb22
+FROM node:22.15-alpine3.20
+
+RUN apk update && apk upgrade --no-cache
+
+RUN npm install -g pnpm
+
+WORKDIR /app
+
+# Copy workspace manifests first for layer caching
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY backend/package.json backend/tsconfig.json backend/tsconfig.build.json backend/nest-cli.json backend/prisma.config.ts ./backend/
+COPY backend/prisma ./backend/prisma
+
+# Install only backend dependencies
+RUN pnpm install --filter backend --frozen-lockfile
+
+# Generate Prisma client (schema is now available)
+RUN cd backend && npx prisma generate --schema prisma/schema.prisma
+
+COPY backend/docker/docker-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+WORKDIR /app/backend
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["pnpm", "start:dev"]
