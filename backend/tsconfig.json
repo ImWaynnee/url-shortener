@@ -19,7 +19,8 @@
       "@src/*": ["./src/*"],
       "@modules/*": ["./src/modules/*"],
       "@prisma/*": ["./src/prisma/*"],
-      "@config/*": ["./src/config/*"]
+      "@config/*": ["./src/config/*"],
+      "@guards/*": ["./src/common/guards/*"]
     }
   },
   "watchOptions": {
