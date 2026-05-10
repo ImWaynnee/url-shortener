@@ -9,7 +9,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - REDIRECT_DOMAIN=${NGINX_REDIRECT_HOST}
+      - REDIRECT_DOMAIN=https://${NGINX_REDIRECT_HOST}
       - PORT=${BACKEND_PORT:-3000}
     expose:
       - '${BACKEND_PORT:-3000}'

@@ -9,7 +9,7 @@ COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY backend/package.json backend/prisma.config.ts ./backend/
 COPY backend/prisma ./backend/prisma
 
-RUN pnpm install --filter backend... --frozen-lockfile --reporter=verbose
+RUN pnpm install --filter backend... --frozen-lockfile
 
 RUN cd backend && npx prisma generate --schema prisma/schema.prisma
 
@@ -25,17 +25,17 @@ RUN npm install -g pnpm
 
 WORKDIR /app
 
-# 1. Copy workspace files to the root
+# Copy workspace manifests
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-
-# 2. Copy backend files (Added the destination './backend/' to the first line)
 COPY backend/package.json backend/prisma.config.ts ./backend/
 COPY backend/prisma ./backend/prisma
 
-# 3. Install production dependencies
-RUN pnpm install --prod --filter backend... --frozen-lockfile --reporter=verbose
+# Copy node_modules from builder and prune to production-only
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/backend/node_modules ./backend/node_modules
+RUN pnpm prune --prod
 
-# 4. Copy build artifacts from the builder stage
+# Copy build artifacts from the builder stage
 COPY --from=builder /app/backend/dist ./backend/dist
 COPY --from=builder /app/backend/src/generated ./backend/src/generated
 
