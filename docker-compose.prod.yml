@@ -4,7 +4,7 @@ services:
     container_name: urlshortener_backend
     build:
       context: .
-      dockerfile: backend/docker/Dockerfile.dev
+      dockerfile: backend/docker/Dockerfile.prod
     restart: unless-stopped
     env_file:
       - ./backend/.env
@@ -13,9 +13,6 @@ services:
       - PORT=${BACKEND_PORT:-3000}
     expose:
       - '${BACKEND_PORT:-3000}'
-    volumes:
-      # mount source so nest --watch picks up changes
-      - ./backend/src:/app/backend/src
     depends_on:
       - postgres
       - redis
@@ -28,8 +25,11 @@ services:
     restart: unless-stopped
     ports:
       - '80:80'
+      - '443:443'
     volumes:
-      - ./infra/nginx.dev.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ./infra/nginx.prod.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
     environment:
       - NGINX_API_HOST=${NGINX_API_HOST}
       - NGINX_REDIRECT_HOST=${NGINX_REDIRECT_HOST}
@@ -37,7 +37,15 @@ services:
       - backend
     networks:
       - urlshortener_network
-      
+
+  redis:
+    container_name: urlshortener_redis
+    image: redis:7-alpine
+    restart: always
+    command: ['redis-server', '--requirepass', '${REDIS_PASSWORD}']
+    networks:
+      - urlshortener_network
+
   postgres:
     container_name: urlshortener_postgres
     image: postgres:16-alpine
@@ -46,37 +54,8 @@ services:
       POSTGRES_DB: urlshortener
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - urlshortener_network
-
-  redis:
-    container_name: urlshortener_redis
-    image: redis:7-alpine
-    restart: always
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
-    ports:
-      - '${REDIS_PORT:-6379}:6379'
-    networks:
-      - urlshortener_network
-
-  prisma-studio:
-    container_name: urlshortener_prisma_studio
-    build:
-      context: .
-      dockerfile: backend/docker/Dockerfile.dev
-    profiles:
-      - tools
-    env_file:
-      - ./backend/.env
-    ports:
-      - '${PRISMA_STUDIO_PORT:-5555}:5555'
-    command: ['npx', 'prisma', 'studio', '--port', '5555', '--browser', 'none']
-    depends_on:
-      - postgres
     networks:
       - urlshortener_network
 

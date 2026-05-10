@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "scripts": {
     "build": "pnpm run prisma:generate && nest build",
+    "build:prod": "nest build",
     "dev": "docker compose up --build -d",
     "dev:tools": "docker compose --profile tools up --build -d",
     "dev:rebuild": "docker compose up --build -d backend",
-    "start": "node dist/main",
+    "start:prod": "node dist/main",
     "start:dev": "nest start --watch",
     "test": "jest",
     "test:watch": "jest --watch",

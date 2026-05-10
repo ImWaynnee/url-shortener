@@ -10,7 +10,7 @@ WORKDIR /app
 
 # Copy workspace manifests first for layer caching
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY backend/package.json backend/tsconfig.json backend/tsconfig.build.json backend/nest-cli.json backend/prisma.config.ts ./backend/
+COPY backend/package.json backend/prisma.config.ts ./backend/
 COPY backend/prisma ./backend/prisma
 
 # Install only backend dependencies
@@ -18,6 +18,8 @@ RUN pnpm install --filter backend --frozen-lockfile
 
 # Generate Prisma client (schema is now available)
 RUN cd backend && npx prisma generate --schema prisma/schema.prisma
+
+COPY backend/tsconfig.json backend/tsconfig.build.json backend/nest-cli.json ./backend/
 
 COPY backend/docker/docker-entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
