@@ -18,6 +18,7 @@
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "paths": {
       "@src/*": ["./src/*"],
+      "@common/*": ["./src/common/*"],
       "@modules/*": ["./src/modules/*"],
       "@config/*": ["./src/config/*"],
       "@guards/*": ["./src/common/guards/*"]
