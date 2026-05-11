@@ -24,7 +24,7 @@ AWS RDS PostgreSQL
 
 Local dev equivalents (Cloudflare DNS A records → 127.0.0.1, proxied through Docker Nginx):
   sh-api-local.wyzwyz.xyz  → API
-  sh-local.wyzwyz.xyz      → Redirects
+  s-local.wyzwyz.xyz      → Redirects
 
 Subdomain separation rationale:
   sh-api.*  = all reads/writes via the frontend (shorten, ping, future CRUD)

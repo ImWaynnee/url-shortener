@@ -18,7 +18,7 @@ class EnvironmentVariables {
   FRONTEND_URL!: string;
 
   @IsOptional()
-  @IsUrl({ require_tld: false })
+  @IsUrl({ require_tld: true })
   REDIRECT_DOMAIN!: string;
 
   @IsOptional()
