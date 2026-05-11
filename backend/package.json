@@ -15,8 +15,9 @@
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "prisma:generate": "dotenv -e .env -- prisma generate",
-    "migrate:dev": "dotenv -e .env.local -- prisma migrate dev && pnpm run prisma:generate",
-    "migrate:reset": "dotenv -e .env.local -- prisma migrate reset && pnpm run prisma:generate"
+    "prisma:createMigrationFilesOnly": "dotenv -e .env.local -- prisma migrate dev --create-only",
+    "prisma:migrate": "dotenv -e .env.local -- prisma migrate dev && pnpm run prisma:generate",
+    "prisma:reset": "dotenv -e .env.local -- prisma migrate reset && pnpm run prisma:generate"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.16",

@@ -13,9 +13,8 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
-      configService.get<string>('FRONTEND_URL'),
-      'http://localhost:7777',
-    ].filter(Boolean) as string[],
+      configService.get<string>('FRONTEND_URL')
+    ] as string[],
     methods: ['GET', 'POST'],
     credentials: false,
   });
