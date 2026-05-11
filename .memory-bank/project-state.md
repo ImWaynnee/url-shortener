@@ -7,6 +7,7 @@ Monorepo with NestJS backend, React+Vite+Tailwind frontend, PostgreSQL via Prism
 ## Tech Stack
 - Backend: NestJS, Prisma v7 (https://www.prisma.io/docs/guides/frameworks/nestjs), PostgreSQL
   - Rate Limiting: @nestjs/throttler (https://docs.nestjs.com/security/rate-limiting)
+  - Auth: @nestjs/passport
 - Frontend: React, Vite, TypeScript, Tailwind CSS, Axios
 - Local dev: Docker Compose (postgres)
 - Deployment: Cloudflare Pages (frontend) + AWS EC2/PM2 + RDS PostgreSQL
@@ -66,3 +67,7 @@ Subdomain separation rationale:
 - `vite-env.d.ts` declares `ImportMetaEnv` shape — gives TS types and autocomplete for `VITE_*` vars.
 - `src/config/env.ts` is the single file that reads `import.meta.env`; throws at startup if required vars are missing.
 - Components use `import { env } from @config/env` only.
+
+### [2026-05-11] Authentication: JWT + Passport (local + Google OAuth)
+- Strategies: passport-local (email/password), passport-google-oauth20, passport-jwt
+- Token model: short-lived JWT, long-lived refresh token.

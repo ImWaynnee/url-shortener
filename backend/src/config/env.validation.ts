@@ -26,6 +26,32 @@ class EnvironmentVariables {
   @Min(1)
   @Max(65535)
   PORT!: number;
+
+  @IsString()
+  JWT_SECRET!: string;
+
+  @IsNumber()
+  @Min(0)
+  JWT_EXPIRATION!: number;
+
+  @IsNumber()
+  @Min(0)
+  JWT_REFRESH_EXPIRATION!: number;
+
+  @IsString()
+  GOOGLE_OAUTH_SESSION_SECRET!: string;
+
+  @IsOptional()
+  @IsString()
+  GOOGLE_OAUTH_CLIENT_ID!: string;
+
+  @IsOptional()
+  @IsString()
+  GOOGLE_OAUTH_CLIENT_SECRET!: string;
+
+  @IsOptional()
+  @IsString()
+  GOOGLE_OAUTH_REDIRECT_URI!: string;
 }
 
 export function validate(config: Record<string, unknown>) {

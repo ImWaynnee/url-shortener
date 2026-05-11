@@ -1,9 +1,27 @@
-import UrlShortener from '@components/UrlShortener';
+import { BackendStatusCard } from '@components/BackendStatusCard';
+import { ProtectedRoute } from '@components/ProtectedRoute';
+import { AuthCallbackPage } from '@pages/AuthCallbackPage';
+import { DashboardPage } from '@pages/DashboardPage';
+import { HomePage } from '@pages/HomePage';
+import { LoginPage } from '@pages/LoginPage';
+import { RegisterPage } from '@pages/RegisterPage';
+import { Navigate, Route, Routes } from 'react-router';
 
 export default function App() {
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <UrlShortener />
-    </main>
+    <>
+      <BackendStatusCard />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard/home" element={<DashboardPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/dashboard/home" replace />} />
+      </Routes>
+    </>
   );
 }

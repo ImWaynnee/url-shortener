@@ -82,7 +82,7 @@ module.exports = [
       "no-restricted-imports": ["error", {
         "patterns": [{
           "group": ["./*", "../*"],
-          "message": "Use path aliases (@src/, @modules/, @prisma/, @config/, @guards/) instead of relative imports. Add into tsconfig.json paths if needed.",
+          "message": "Use path aliases (@src/, @modules/, @config/, @guards/) instead of relative imports. Add into tsconfig.json paths if needed.",
         }],
       }],
 

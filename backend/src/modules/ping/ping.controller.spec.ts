@@ -13,8 +13,8 @@ describe('PingController', () => {
   });
 
   describe('GET /ping', () => {
-    it('should return { message: "Pong!" }', () => {
-      expect(controller.ping()).toEqual({ message: 'Pong!' });
+    it('should return { message: "pong!" }', () => {
+      expect(controller.ping()).toEqual({ message: 'pong!' });
     });
   });
 });

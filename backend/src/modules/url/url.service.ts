@@ -11,7 +11,7 @@ export class UrlService {
     private readonly config: ConfigService,
   ) {}
 
-  async createShortUrl(dto: CreateUrlRequest) {
+  async createShortUrl(dto: CreateUrlRequest, userId?: string) {
     let shortUrl: string;
     let exists: boolean;
 
@@ -28,7 +28,8 @@ export class UrlService {
     const url = await this.prisma.url.create({
       data: {
         shortUrl,
-        originalUrl: dto.url 
+        originalUrl: dto.url,
+        ...(userId ? { createdById: userId } : {}),
       },
     });
 

@@ -7,6 +7,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "useDefineForClassFields": false,
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "declaration": true,
     "removeComments": true,
@@ -17,8 +18,8 @@
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "paths": {
       "@src/*": ["./src/*"],
+      "@common/*": ["./src/common/*"],
       "@modules/*": ["./src/modules/*"],
-      "@prisma/*": ["./src/prisma/*"],
       "@config/*": ["./src/config/*"],
       "@guards/*": ["./src/common/guards/*"]
     }

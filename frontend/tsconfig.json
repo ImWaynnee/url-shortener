@@ -18,6 +18,10 @@
     "paths": {
       "@components/*": ["./src/components/*"],
       "@config/*": ["./src/config/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@api/*": ["./src/api/*"],
+      "@contexts/*": ["./src/contexts/*"],
+      "@hooks/*": ["./src/hooks/*"],
       "@src/*": ["./src/*"]
     },
     "types": ["vite/client"]
