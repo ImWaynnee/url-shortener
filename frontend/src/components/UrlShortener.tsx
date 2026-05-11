@@ -69,7 +69,7 @@ export default function UrlShortener() {
 
   async function handleCopy() {
     if (!result) return;
-    await navigator.clipboard.writeText(result.shortUrl);
+    await navigator.clipboard.writeText(result.newUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
