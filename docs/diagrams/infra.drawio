@@ -1,39 +1,67 @@
 <mxfile host="65bd71144e">
-    <diagram id="infra" name="Infrastructure">
-        <mxGraphModel dx="797" dy="530" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+    <diagram id="infra" name="MVP Infrastructure">
+        <mxGraphModel dx="1345" dy="595" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="page-title" value="URL Shortener - Infrastructure &amp;amp; Deployment Architecture" style="text;fontSize=20;fontStyle=1;align=center;html=1;" parent="1" vertex="1">
+                <mxCell id="title" value="URL Shortener - MVP Architecture" style="text;fontSize=18;fontStyle=1;align=center;html=1;" parent="1" vertex="1">
                     <mxGeometry x="100" y="20" width="1400" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="t1" value="MVP" style="swimlane;startSize=35;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;rounded=1;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="600" y="100" width="380" height="570" as="geometry"/>
+                <mxCell id="browser" value="Browser" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="280" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="t1-cf" value="Cloudflare Pages&#xa;React + Vite + Tailwind&#xa;Global CDN · Free HTTPS" style="rounded=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;html=1;" parent="t1" vertex="1">
-                    <mxGeometry x="50" y="55" width="280" height="70" as="geometry"/>
+                <mxCell id="cf" value="Cloudflare Pages&#xa;sh.wyzwyz.xyz&#xa;React + Vite · Global CDN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="140" y="156" width="220" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="t1-ec2" value="AWS EC2 t3.micro" style="swimlane;startSize=28;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;rounded=1;html=1;" parent="t1" vertex="1">
-                    <mxGeometry x="30" y="190" width="320" height="190" as="geometry"/>
+                <mxCell id="github" value="GitHub&#xa;Actions (CI/CD)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="380" width="180" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="t1-nginx" value="Nginx (port 80/443)&lt;br&gt;sh-api.domain.com → :3000 (API)&lt;br&gt;sh.domain.com → :3000 (redirects)" style="rounded=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;html=1;" parent="t1-ec2" vertex="1">
-                    <mxGeometry x="20" y="38" width="280" height="60" as="geometry"/>
+                <mxCell id="aws" value="AWS" style="swimlane;startSize=24;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=1;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="60" width="1000" height="480" as="geometry"/>
                 </mxCell>
-                <mxCell id="t1-nest" value="NestJS + PM2 (port 3000)&lt;br&gt;POST /urls/shorten&lt;br&gt;GET /:shortUrl → 302" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;html=1;" parent="t1-ec2" vertex="1">
-                    <mxGeometry x="20" y="115" width="280" height="60" as="geometry"/>
+                <mxCell id="ec2" value="EC2 t3.micro (Docker Compose)" style="swimlane;startSize=24;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;html=1;" parent="aws" vertex="1">
+                    <mxGeometry x="20" y="36" width="940" height="400" as="geometry"/>
                 </mxCell>
-                <mxCell id="t1-rds" value="AWS RDS PostgreSQL&#xa;db.t3.micro · Single-AZ&#xa;SG: allow 5432 from EC2 only" style="rounded=1;whiteSpace=wrap;shape=cylinder3;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;html=1;" parent="t1" vertex="1">
-                    <mxGeometry x="90" y="450" width="200" height="80" as="geometry"/>
+                <mxCell id="nginx" value="Nginx&#xa;port 80/443 (exposed)&#xa;sh-api.wyzwyz.xyz → :3000&#xa;s.wyzwyz.xyz → :3000" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" parent="ec2" vertex="1">
+                    <mxGeometry x="30" y="50" width="200" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="t1-e1" value="HTTPS&#xa;VITE_API_BASE_URL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="t1" source="t1-cf" target="t1-ec2" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="240" y="210" as="targetPoint"/>
-                    </mxGeometry>
+                <mxCell id="nestjs" value="NestJS&#xa;port 3000 (internal)&#xa;POST /urls/shorten&#xa;GET /:shortUrl → 302" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="ec2" vertex="1">
+                    <mxGeometry x="370" y="50" width="200" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="t1-e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="t1" source="t1-nginx" target="t1-nest" edge="1">
+                <mxCell id="redis" value="Redis 7&#xa;port 6379 (internal)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="ec2" vertex="1">
+                    <mxGeometry x="650" y="114" width="180" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="postgres" value="PostgreSQL 16&#xa;port 5432 (internal)&#xa;volume: postgres_data" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="ec2" vertex="1">
+                    <mxGeometry x="470" y="244" width="180" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="ec2-sg" value="SG: inbound 22 (SSH), 80 (HTTP), 443 (HTTPS) only" style="text;html=1;fontSize=10;fontStyle=2;fillColor=none;strokeColor=none;" parent="ec2" vertex="1">
+                    <mxGeometry x="20" y="354" width="440" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-browser-cf" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="1" source="browser" target="cf" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="t1-e3" value="Prisma (private subnet)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;" parent="t1" source="t1-ec2" target="t1-rds" edge="1">
+                <mxCell id="e-browser-nginx" value="HTTPS (s.wyzwyz.xyz)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="1" source="browser" target="nginx" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-cf-nginx" value="HTTPS sh-api.wyzwyz.xyz" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="1" source="cf" target="nginx" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-github-ec2" value="SSH deploy (git pull + compose up)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;" parent="1" source="github" edge="1">
+                    <mxGeometry x="-0.0422" relative="1" as="geometry">
+                        <mxPoint x="540" y="410" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="540" y="410"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-nginx-nest" value="proxy_pass :3000" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="1" source="nginx" target="nestjs" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-nest-redis" value="cache" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="1" source="nestjs" target="redis" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-nest-postgres" value="Prisma" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="1" source="nestjs" target="postgres" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
             </root>

@@ -1,1 +1,13 @@
 pnpm lint-staged
+
+# Update sitemap lastmod if any frontend files are staged
+if git diff --cached --name-only | grep -q "^frontend/"; then
+  node -e "
+    const fs = require('fs');
+    const file = 'frontend/public/sitemap.xml';
+    const date = new Date().toISOString().slice(0, 10);
+    fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace(/<lastmod>.*<\/lastmod>/, '<lastmod>' + date + '<\/lastmod>'));
+    console.info('→ sitemap.xml lastmod updated to ' + date);
+  "
+  git add frontend/public/sitemap.xml
+fi

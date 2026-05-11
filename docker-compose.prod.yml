@@ -1,0 +1,67 @@
+name: 'urlshortener-backend-prod'
+services:
+  backend:
+    container_name: urlshortener_backend_prod
+    build:
+      context: .
+      dockerfile: backend/docker/Dockerfile.prod
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      - REDIRECT_DOMAIN=https://${NGINX_REDIRECT_HOST}
+      - PORT=${BACKEND_PORT:-3000}
+    expose:
+      - '${BACKEND_PORT:-3000}'
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - urlshortener_network_prod
+
+  nginx:
+    container_name: urlshortener_nginx_prod
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./infra/nginx.prod.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
+    environment:
+      - NGINX_API_HOST=${NGINX_API_HOST}
+      - NGINX_REDIRECT_HOST=${NGINX_REDIRECT_HOST}
+    depends_on:
+      - backend
+    networks:
+      - urlshortener_network_prod
+
+  redis:
+    container_name: urlshortener_redis_prod
+    image: redis:7-alpine
+    restart: always
+    command: ['redis-server', '--requirepass', '${REDIS_PASSWORD}']
+    networks:
+      - urlshortener_network_prod
+
+  postgres:
+    container_name: urlshortener_postgres_prod
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: urlshortener
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - urlshortener_network_prod
+
+networks:
+  urlshortener_network_prod:
+    driver: bridge
+
+volumes:
+  postgres_data:
