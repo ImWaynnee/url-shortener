@@ -210,7 +210,8 @@ export class AuthService {
     return {
       accessToken: this.jwtService.sign({
         sub: row.user.id,
-        email: row.user.email 
+        email: row.user.email,
+        ...(row.user.fullName ? { fullName: row.user.fullName } : {}),
       }),
       refreshToken: newRefreshToken,
     };
@@ -222,7 +223,8 @@ export class AuthService {
 
   private async generateTokenPair(
     user: { id: string;
-      email: string },
+      email: string;
+      fullName?: string | null },
     clientInfo: ClientInfo,
   ): Promise<AuthTokenResponse> {
     const refreshToken = randomUUID();
@@ -241,7 +243,8 @@ export class AuthService {
     return {
       accessToken: this.jwtService.sign({
         sub: user.id,
-        email: user.email 
+        email: user.email,
+        ...(user.fullName ? { fullName: user.fullName } : {}),
       }),
       refreshToken: refreshToken,
     };

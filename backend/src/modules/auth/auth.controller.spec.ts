@@ -119,6 +119,13 @@ describe('AuthController', () => {
     });
   });
 
+  // ──────────────── GET /auth/google ────────────────
+  describe('googleAuth()', () => {
+    it('returns undefined (guard handles the redirect)', () => {
+      expect(controller.googleAuth()).toBeUndefined();
+    });
+  });
+
   // ──────────────── GET /auth/google/callback ────────────────
   describe('googleCallback()', () => {
     it('redirects to frontendUrl with tokens as query params', async () => {

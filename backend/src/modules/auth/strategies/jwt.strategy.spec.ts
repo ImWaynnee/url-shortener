@@ -30,12 +30,14 @@ describe('JwtStrategy', () => {
     it('maps sub to userId and preserves email', () => {
       const payload: JwtPayload = {
         sub: 'user-uuid',
-        email: 'alice@example.com' 
+        email: 'alice@example.com',
+        fullName: 'Alice', 
       };
       const result = strategy.validate(payload);
       expect(result).toEqual({
         userId: 'user-uuid',
-        email: 'alice@example.com' 
+        email: 'alice@example.com',
+        fullName: 'Alice',
       });
     });
   });

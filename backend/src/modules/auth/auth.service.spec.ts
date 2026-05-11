@@ -250,6 +250,17 @@ describe('AuthService', () => {
       expect(result).toMatchObject({ accessToken: 'signed-jwt' });
       expect(typeof result.refreshToken).toBe('string');
     });
+
+    it('omits fullName from JWT when user has no fullName', async () => {
+      const userWithoutName = {
+        ...MOCK_USER,
+        fullName: null 
+      };
+      prisma.userRefreshToken.create.mockResolvedValue({});
+      await service.loginWithGoogle(userWithoutName, CLIENT_INFO);
+      const signArg = (jwtService.sign as jest.Mock).mock.calls[0][0];
+      expect(signArg).not.toHaveProperty('fullName');
+    });
   });
 
   // ──────────────── refreshTokens ────────────────
@@ -337,13 +348,31 @@ describe('AuthService', () => {
       expect(prisma.userRefreshToken.create).toHaveBeenCalledTimes(1);
     });
 
-    it('signs the JWT with the correct sub and email', async () => {
+    it('signs the JWT with the correct sub, email, and fullName', async () => {
       prisma.userRefreshToken.findUnique.mockResolvedValue(buildRow());
       await service.refreshTokens(validToken, CLIENT_INFO);
       expect(jwtService.sign).toHaveBeenCalledWith({
         sub: MOCK_USER.id,
-        email: MOCK_USER.email 
+        email: MOCK_USER.email,
+        fullName: MOCK_USER.fullName,
       });
+    });
+
+    it('omits fullName from JWT when user has no fullName', async () => {
+      const userWithoutName = {
+        ...MOCK_USER,
+        fullName: null 
+      };
+      prisma.userRefreshToken.findUnique.mockResolvedValue(
+        buildRow({ user: userWithoutName }),
+      );
+      await service.refreshTokens(validToken, CLIENT_INFO);
+      expect(jwtService.sign).toHaveBeenCalledWith({
+        sub: userWithoutName.id,
+        email: userWithoutName.email,
+      });
+      const signArg = (jwtService.sign as jest.Mock).mock.calls[0][0];
+      expect(signArg).not.toHaveProperty('fullName');
     });
   });
 });

@@ -43,24 +43,57 @@ describe('UrlService', () => {
   });
 
   describe('createShortUrl', () => {
-    it('should generate a short code and return the shortened URL', async () => {
-      mockPrismaService.url.findUnique.mockResolvedValue(null);
-      mockPrismaService.url.create.mockResolvedValue({
-        shortUrl: 'abc1234',
-        originalUrl: 'https://example.com',
-      });
+    const mockUrl = {
+      shortUrl: 'abc1234',
+      originalUrl: 'https://example.com',
+    };
 
+    beforeEach(() => {
+      mockPrismaService.url.findUnique.mockResolvedValue(null);
+      mockPrismaService.url.create.mockResolvedValue(mockUrl);
+    });
+
+    it('should create a short URL without createdById when no userId provided', async () => {
       const result = await service.createShortUrl({ url: 'https://example.com' });
 
       expect(mockPrismaService.url.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({ originalUrl: 'https://example.com' }),
+        data: expect.not.objectContaining({ createdById: expect.anything() }),
       });
-
       expect(result).toEqual({
         shortUrl: 'abc1234',
         originalUrl: 'https://example.com',
         newUrl: 'http://sh.example.com/abc1234',
       });
+    });
+
+    it('should attach createdById when userId is provided', async () => {
+      const result = await service.createShortUrl(
+        { url: 'https://example.com' },
+        'user-uuid-123',
+      );
+
+      expect(mockPrismaService.url.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          originalUrl: 'https://example.com',
+          createdById: 'user-uuid-123',
+        }),
+      });
+      expect(result).toEqual({
+        shortUrl: 'abc1234',
+        originalUrl: 'https://example.com',
+        newUrl: 'http://sh.example.com/abc1234',
+      });
+    });
+
+    it('should retry if the first short code is already taken', async () => {
+      mockPrismaService.url.findUnique
+        .mockResolvedValueOnce({ shortUrl: 'taken01' })
+        .mockResolvedValueOnce(null);
+
+      await service.createShortUrl({ url: 'https://example.com' });
+
+      expect(mockPrismaService.url.findUnique).toHaveBeenCalledTimes(2);
+      expect(mockPrismaService.url.create).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -1,3 +1,4 @@
+import { apiClient } from '@api/client';
 import { env } from '@config/env';
 import axios from 'axios';
 import { useState } from 'react';
@@ -44,7 +45,7 @@ export default function UrlShortener() {
 
     setLoading(true);
     try {
-      const { data } = await axios.post<ShortenResponse>(
+      const { data } = await apiClient.post<ShortenResponse>(
         `${env.apiBaseUrl}/urls/shorten`,
         { url: normalized },
       );

@@ -2,13 +2,20 @@ import { UrlController } from '@modules/url/url.controller';
 import { UrlService } from '@modules/url/url.service';
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+
+const makeReq = (userId?: string) =>
+  ({
+    user: userId ? {
+      userId,
+      email: 'test@example.com' 
+    } : undefined 
+  } as unknown as Request);
 
 describe('UrlController', () => {
   let controller: UrlController;
   let service: UrlService;
 
-  // Define the mock implementation clearly
   const mockUrlService = {
     createShortUrl: jest.fn(),
     getOriginalUrl: jest.fn(),
@@ -22,7 +29,6 @@ describe('UrlController', () => {
       providers: [
         {
           provide: UrlService,
-          // UseValue is fine, but in larger suites, useFactory is more flexible
           useValue: mockUrlService,
         },
       ],
@@ -33,20 +39,36 @@ describe('UrlController', () => {
   });
 
   describe('POST /urls/shorten', () => {
-    it('should return the shortened URL response', async () => {
-      const dto = { url: 'https://example.com' };
-      const serviceResult = {
-        shortUrl: 'abc1234',
-        originalUrl: 'https://example.com',
-        newUrl: 'http://s-local.wyzwyz.xyz/abc1234',
-      };
-      
+    const serviceResult = {
+      shortUrl: 'abc1234',
+      originalUrl: 'https://example.com',
+      newUrl: 'http://s-local.wyzwyz.xyz/abc1234',
+    };
+
+    it('should call createShortUrl without userId when unauthenticated', async () => {
       mockUrlService.createShortUrl.mockResolvedValue(serviceResult);
 
-      const result = await controller.shorten(dto);
+      const result = await controller.shorten({ url: 'https://example.com' }, makeReq());
 
-      expect(service.createShortUrl).toHaveBeenCalledWith(dto);
-      // Check for deep equality rather than reference identity
+      expect(service.createShortUrl).toHaveBeenCalledWith(
+        { url: 'https://example.com' },
+        undefined,
+      );
+      expect(result).toEqual(serviceResult);
+    });
+
+    it('should call createShortUrl with userId when authenticated', async () => {
+      mockUrlService.createShortUrl.mockResolvedValue(serviceResult);
+
+      const result = await controller.shorten(
+        { url: 'https://example.com' },
+        makeReq('user-uuid-123'),
+      );
+
+      expect(service.createShortUrl).toHaveBeenCalledWith(
+        { url: 'https://example.com' },
+        'user-uuid-123',
+      );
       expect(result).toEqual(serviceResult);
     });
   });
