@@ -52,6 +52,16 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   GOOGLE_OAUTH_REDIRECT_URI!: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  CACHE_L1_TTL_MS!: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  CACHE_L2_TTL_MS!: number;
 }
 
 export function validate(config: Record<string, unknown>) {

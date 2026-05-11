@@ -3,6 +3,7 @@ import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import { UserModel } from '@src/generated/prisma/models';
 import { PrismaService } from '@src/prisma.service';
 import * as bcrypt from 'bcrypt';
 
@@ -15,11 +16,7 @@ const MOCK_USER = {
   id: 'user-uuid',
   email: 'alice@example.com',
   fullName: 'Alice' 
-} as any;
-const TOKEN_RESPONSE = {
-  accessToken: 'signed-jwt',
-  refreshToken: expect.any(String) 
-};
+} as UserModel;
 
 function buildPrismaMock() {
   return {
@@ -47,13 +44,12 @@ describe('AuthService', () => {
   let service: AuthService;
   let prisma: ReturnType<typeof buildPrismaMock>;
   let jwtService: jest.Mocked<JwtService>;
-  let configService: jest.Mocked<ConfigService>;
 
   beforeEach(async () => {
     prisma = buildPrismaMock();
 
     // Default: $transaction runs the callback with the same mock
-    prisma.$transaction.mockImplementation((cb: any) => cb(prisma));
+    prisma.$transaction.mockImplementation((cb: (tx: typeof prisma) => Promise<unknown>) => cb(prisma));
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -75,7 +71,6 @@ describe('AuthService', () => {
 
     service = module.get<AuthService>(AuthService);
     jwtService = module.get(JwtService);
-    configService = module.get(ConfigService);
   });
 
   // ──────────────── validateLocalUser ────────────────

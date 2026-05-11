@@ -1,4 +1,5 @@
 import { UrlService } from '@modules/url/url.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -19,6 +20,12 @@ const mockConfigService = {
   }),
 };
 
+const mockCacheManager = {
+  get: jest.fn(),
+  set: jest.fn(),
+  del: jest.fn(),
+};
+
 describe('UrlService', () => {
   let service: UrlService;
 
@@ -35,6 +42,10 @@ describe('UrlService', () => {
         {
           provide: ConfigService,
           useValue: mockConfigService 
+        },
+        {
+          provide: CACHE_MANAGER,
+          useValue: mockCacheManager,
         },
       ],
     }).compile();
@@ -98,25 +109,38 @@ describe('UrlService', () => {
   });
 
   describe('getOriginalUrl', () => {
-    it('should return the original URL when the short code exists', async () => {
-      const mockShortUrl = 'abc1234';
-      const mockOriginalUrl = 'https://example.com';
-      const mockData = {
-        shortUrl: mockShortUrl,
-        originalUrl: mockOriginalUrl,
-      };
+    it('should return cached value without hitting DB on cache hit', async () => {
+      mockCacheManager.get.mockResolvedValue('https://example.com');
 
-      mockPrismaService.url.findUnique.mockResolvedValue(mockData);
+      const result = await service.getOriginalUrl('abc1234');
 
-      const result = await service.getOriginalUrl(mockShortUrl);
+      expect(mockCacheManager.get).toHaveBeenCalledWith('redirect:abc1234');
+      expect(mockPrismaService.url.findUnique).not.toHaveBeenCalled();
+      expect(result).toEqual('https://example.com');
+    });
 
-      expect(mockPrismaService.url.findUnique).toHaveBeenCalledWith({
-        where: { shortUrl: mockShortUrl },
+    it('should query DB and populate cache on cache miss', async () => {
+      mockCacheManager.get.mockResolvedValue(undefined);
+      mockPrismaService.url.findUnique.mockResolvedValue({
+        shortUrl: 'abc1234',
+        originalUrl: 'https://example.com',
       });
-      expect(result).toEqual(mockOriginalUrl);
+
+      const result = await service.getOriginalUrl('abc1234');
+
+      expect(mockCacheManager.get).toHaveBeenCalledWith('redirect:abc1234');
+      expect(mockPrismaService.url.findUnique).toHaveBeenCalledWith({
+        where: { shortUrl: 'abc1234' },
+      });
+      expect(mockCacheManager.set).toHaveBeenCalledWith(
+        'redirect:abc1234',
+        'https://example.com',
+      );
+      expect(result).toEqual('https://example.com');
     });
 
     it('should throw NotFoundException when short code does not exist', async () => {
+      mockCacheManager.get.mockResolvedValue(undefined);
       mockPrismaService.url.findUnique.mockResolvedValue(null);
 
       await expect(service.getOriginalUrl('notfound')).rejects.toThrow(

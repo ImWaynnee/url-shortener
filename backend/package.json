@@ -20,6 +20,8 @@
     "prisma:reset": "dotenv -e .env.local -- prisma migrate reset && pnpm run prisma:generate"
   },
   "dependencies": {
+    "@keyv/redis": "^5.1.6",
+    "@nestjs/cache-manager": "^3.1.2",
     "@nestjs/common": "^11.0.16",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.16",
@@ -31,11 +33,14 @@
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "bcrypt": "^6.0.0",
+    "cache-manager": "^7.2.8",
+    "cacheable": "^2.3.5",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.4",
     "dotenv": "^17.4.2",
     "express-session": "^1.19.0",
     "helmet": "^8.1.0",
+    "keyv": "^5.6.0",
     "nanoid": "^3.3.12",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",

@@ -1,9 +1,13 @@
-import { ValidationPipe } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@src/app.module';
+import { Cache } from 'cache-manager';
 import session from 'express-session';
 import helmet from 'helmet';
+
+const logger = new Logger('Bootstrap');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -49,5 +53,23 @@ async function bootstrap() {
   );
 
   await app.listen(configService.get<number>('PORT') ?? 3000);
+
+  // Startup cache health check
+  const cache = app.get<Cache>(CACHE_MANAGER);
+  const PROBE_KEY = '__startup_health__';
+  try {
+    await cache.set(PROBE_KEY, '1', 3000);
+    const val = await cache.get<string>(PROBE_KEY);
+    if (val === '1') {
+      logger.log('L1 (in-memory) connected ✓');
+      logger.log('L2 (Redis)     connected ✓');
+    }
+    await cache.del(PROBE_KEY);
+  } catch (err) {
+    logger.error(`Startup health check failed: ${(err as Error).message}`);
+    logger.error('Shutting down — cache is required for operation.');
+    process.exit(1);
+  }
 }
+
 bootstrap();
