@@ -2,7 +2,7 @@ import { AuthService } from '@modules/auth/auth.service';
 import { GoogleStrategy } from '@modules/auth/strategies/google.strategy';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import type { UserModel } from '@src/generated/prisma/models/User';
+import { UserModel } from '@src/generated/prisma/models/User';
 import { Profile } from 'passport-google-oauth20';
 
 describe('GoogleStrategy', () => {

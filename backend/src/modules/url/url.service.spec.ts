@@ -1,3 +1,4 @@
+import { COALESCING_SERVICE } from '@common/coalescing/coalescing.interface';
 import { UrlService } from '@modules/url/url.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { NotFoundException } from '@nestjs/common';
@@ -26,6 +27,11 @@ const mockCacheManager = {
   del: jest.fn(),
 };
 
+// Passthrough: makes coalescing transparent in single-call unit tests.
+const mockCoalescingService = {
+  coalesce: jest.fn(<T>(_key: string, fetcher: () => Promise<T>) => fetcher()),
+};
+
 describe('UrlService', () => {
   let service: UrlService;
 
@@ -46,6 +52,10 @@ describe('UrlService', () => {
         {
           provide: CACHE_MANAGER,
           useValue: mockCacheManager,
+        },
+        {
+          provide: COALESCING_SERVICE,
+          useValue: mockCoalescingService,
         },
       ],
     }).compile();

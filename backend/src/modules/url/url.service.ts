@@ -1,3 +1,4 @@
+import { COALESCING_SERVICE, ICoalescingService } from '@common/coalescing/coalescing.interface';
 import { CreateUrlRequest } from '@modules/url/dto/create-url.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
@@ -12,6 +13,7 @@ export class UrlService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
+    @Inject(COALESCING_SERVICE) private readonly coalescing: ICoalescingService,
   ) {}
 
   async createShortUrl(dto: CreateUrlRequest, userId?: string) {
@@ -47,22 +49,21 @@ export class UrlService {
     const cacheKey = `redirect:${shortUrl}`;
 
     const cached = await this.cache.get<string>(cacheKey);
-    if (cached) {
-      return cached;
-    }
+    if (cached) return cached;
 
-    const url = await this.prisma.url.findUnique({
-      where: {
-        shortUrl,
-      } 
+    // Coalesce concurrent cache-miss requests for the same key into one DB fetch.
+    return this.coalescing.coalesce(cacheKey, async () => {
+      const rechecked = await this.cache.get<string>(cacheKey);
+      if (rechecked) return rechecked;
+
+      const url = await this.prisma.url.findUnique({ where: { shortUrl } });
+
+      if (!url) {
+        throw new NotFoundException(`Short code "${shortUrl}" not found`);
+      }
+
+      await this.cache.set(cacheKey, url.originalUrl);
+      return url.originalUrl;
     });
-
-    if (!url) {
-      throw new NotFoundException(`Short code "${shortUrl}" not found`);
-    }
-
-    await this.cache.set(cacheKey, url.originalUrl);
-
-    return url.originalUrl;
   }
 }

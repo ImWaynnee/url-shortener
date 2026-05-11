@@ -2,7 +2,7 @@ import { AuthService } from '@modules/auth/auth.service';
 import { LocalStrategy } from '@modules/auth/strategies/local.strategy';
 import { UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import type { UserModel } from '@src/generated/prisma/models/User';
+import { UserModel } from '@src/generated/prisma/models/User';
 
 describe('LocalStrategy', () => {
   let strategy: LocalStrategy;
