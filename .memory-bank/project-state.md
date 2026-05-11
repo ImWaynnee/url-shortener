@@ -7,6 +7,7 @@ Monorepo with NestJS backend, React+Vite+Tailwind frontend, PostgreSQL via Prism
 ## Tech Stack
 - Backend: NestJS, Prisma v7 (https://www.prisma.io/docs/guides/frameworks/nestjs), PostgreSQL
   - Rate Limiting: @nestjs/throttler (https://docs.nestjs.com/security/rate-limiting)
+  - Auth: @nestjs/passport
 - Frontend: React, Vite, TypeScript, Tailwind CSS, Axios
 - Local dev: Docker Compose (postgres)
 - Deployment: Cloudflare Pages (frontend) + AWS EC2/PM2 + RDS PostgreSQL
