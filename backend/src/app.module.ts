@@ -1,11 +1,12 @@
 import { validate } from '@config/env.validation';
+import { AuthModule } from '@modules/auth/auth.module';
 import { PingModule } from '@modules/ping/ping.module';
 import { UrlModule } from '@modules/url/url.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { PrismaModule } from '@prisma/prisma.module';
+import { PrismaModule } from '@src/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { PrismaModule } from '@prisma/prisma.module';
     }),
     PingModule,
     UrlModule,
+    AuthModule,
   ],
   providers: [
     {

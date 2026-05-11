@@ -67,3 +67,7 @@ Subdomain separation rationale:
 - `vite-env.d.ts` declares `ImportMetaEnv` shape — gives TS types and autocomplete for `VITE_*` vars.
 - `src/config/env.ts` is the single file that reads `import.meta.env`; throws at startup if required vars are missing.
 - Components use `import { env } from @config/env` only.
+
+### [2026-05-11] Authentication: JWT + Passport (local + Google OAuth)
+- Strategies: passport-local (email/password), passport-google-oauth20, passport-jwt
+- Token model: short-lived JWT, long-lived refresh token.

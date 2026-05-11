@@ -23,6 +23,8 @@ describe('UrlService', () => {
   let service: UrlService;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UrlService,
@@ -38,7 +40,6 @@ describe('UrlService', () => {
     }).compile();
 
     service = module.get<UrlService>(UrlService);
-    jest.clearAllMocks();
   });
 
   describe('createShortUrl', () => {

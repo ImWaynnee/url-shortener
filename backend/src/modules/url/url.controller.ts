@@ -1,9 +1,8 @@
 import { CreateUrlRequest } from '@modules/url/dto/create-url.dto';
 import { UrlService } from '@modules/url/url.service';
 import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
-import { SkipThrottle } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 import { Response } from 'express';
-
 @Controller()
 export class UrlController {
   constructor(private readonly urlService: UrlService) {}
@@ -13,7 +12,12 @@ export class UrlController {
     return this.urlService.createShortUrl(dto);
   }
 
-  @SkipThrottle()
+  @Throttle({
+    default: {
+      limit: 120,
+      ttl: 60000 
+    } 
+  })
   @Get(':shortUrl')
   async redirect(
     @Param('shortUrl') shortUrl: string,

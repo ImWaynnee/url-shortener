@@ -4,31 +4,32 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Response } from 'express';
 
-const mockUrlService = {
-  createShortUrl: jest.fn(),
-  getOriginalUrl: jest.fn(),
-};
-
-const mockResponse = () => {
-  const res = {} as Response;
-  res.redirect = jest.fn().mockReturnValue(res);
-  return res;
-};
-
 describe('UrlController', () => {
   let controller: UrlController;
+  let service: UrlService;
+
+  // Define the mock implementation clearly
+  const mockUrlService = {
+    createShortUrl: jest.fn(),
+    getOriginalUrl: jest.fn(),
+  };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UrlController],
-      providers: [{
-        provide: UrlService,
-        useValue: mockUrlService 
-      }],
+      providers: [
+        {
+          provide: UrlService,
+          // UseValue is fine, but in larger suites, useFactory is more flexible
+          useValue: mockUrlService,
+        },
+      ],
     }).compile();
 
     controller = module.get<UrlController>(UrlController);
-    jest.clearAllMocks();
+    service = module.get<UrlService>(UrlService);
   });
 
   describe('POST /urls/shorten', () => {
@@ -39,34 +40,44 @@ describe('UrlController', () => {
         originalUrl: 'https://example.com',
         newUrl: 'http://s-local.wyzwyz.xyz/abc1234',
       };
+      
       mockUrlService.createShortUrl.mockResolvedValue(serviceResult);
 
       const result = await controller.shorten(dto);
 
-      expect(mockUrlService.createShortUrl).toHaveBeenCalledWith(dto);
-      expect(result).toBe(serviceResult);
+      expect(service.createShortUrl).toHaveBeenCalledWith(dto);
+      // Check for deep equality rather than reference identity
+      expect(result).toEqual(serviceResult);
     });
   });
 
   describe('GET /:shortUrl', () => {
+    // Utility for generating a fresh response mock per test
+    const createMockResponse = () => ({
+      redirect: jest.fn().mockReturnThis(),
+    } as unknown as Response);
+
     it('should redirect to the original URL with 302', async () => {
-      const res = mockResponse();
-      mockUrlService.getOriginalUrl.mockResolvedValue('https://example.com');
+      const res = createMockResponse();
+      const targetUrl = 'https://example.com';
+      mockUrlService.getOriginalUrl.mockResolvedValue(targetUrl);
 
       await controller.redirect('abc1234', res);
 
-      expect(mockUrlService.getOriginalUrl).toHaveBeenCalledWith('abc1234');
-      expect(res.redirect).toHaveBeenCalledWith(302, 'https://example.com');
+      expect(service.getOriginalUrl).toHaveBeenCalledWith('abc1234');
+      expect(res.redirect).toHaveBeenCalledWith(302, targetUrl);
     });
 
     it('should propagate NotFoundException when short code does not exist', async () => {
-      const res = mockResponse();
+      const res = createMockResponse();
+      const errorMsg = 'Short code "notfound" not found';
+      
       mockUrlService.getOriginalUrl.mockRejectedValue(
-        new NotFoundException('Short code "notfound" not found'),
+        new NotFoundException(errorMsg),
       );
 
       await expect(controller.redirect('notfound', res)).rejects.toThrow(
-        NotFoundException,
+        new NotFoundException(errorMsg),
       );
     });
   });
