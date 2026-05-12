@@ -1,6 +1,8 @@
-import { JwtPayload, JwtStrategy } from '@modules/auth/strategies/jwt.strategy';
+import type { JwtPayload} from '@modules/auth/strategies/jwt.strategy';
+import { JwtStrategy } from '@modules/auth/strategies/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 
 // passport-jwt requires a real JWT_SECRET at construction time via configService.getOrThrow
 describe('JwtStrategy', () => {

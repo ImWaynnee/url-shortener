@@ -11,7 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { extractClientInfo } from '@src/common/utils/extract-client-info';
 import type { UserModel } from '@src/generated/prisma/models/User';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -28,7 +28,6 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
   @Post('login')
   login(@Req() req: Request, @Body() _loginData: LoginRequestBody) {
-    console.debug('Login attempt for email:', _loginData.email);
     return this.authService.login(req.user as UserModel, extractClientInfo(req));
   }
 

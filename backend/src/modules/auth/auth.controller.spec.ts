@@ -1,8 +1,13 @@
 import { AuthController } from '@modules/auth/auth.controller';
 import { AuthService } from '@modules/auth/auth.service';
+import type { LoginRequestBody } from '@modules/auth/dto/login.request.dto';
+import type { RefreshRequestBody } from '@modules/auth/dto/refresh.request.dto';
+import type { RegisterRequestBody } from '@modules/auth/dto/register.request.dto';
 import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
-import { Request, Response } from 'express';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { UserModel } from '@src/generated/prisma/models';
+import type { Request, Response } from 'express';
 
 const CLIENT_INFO = {
   deviceInfo: 'TestAgent/1.0',
@@ -15,7 +20,7 @@ const TOKEN_RESPONSE = {
 const MOCK_USER = {
   id: 'user-uuid',
   email: 'alice@example.com' 
-} as any;
+} as UserModel;
 
 function buildRequest(overrides: Partial<Request> = {}): Request {
   return {
@@ -65,7 +70,7 @@ describe('AuthController', () => {
       email: 'alice@example.com',
       password: 'password123',
       fullName: 'Alice' 
-    } as any;
+    } as RegisterRequestBody;
 
     it('delegates to authService.register with client info', async () => {
       authService.register.mockResolvedValue(TOKEN_RESPONSE);
@@ -86,7 +91,7 @@ describe('AuthController', () => {
     const loginData = {
       email: 'alice@example.com',
       password: 'password123' 
-    } as any;
+    } as LoginRequestBody;
 
     it('delegates to authService.login with req.user and client info', async () => {
       authService.login.mockResolvedValue(TOKEN_RESPONSE);
@@ -104,7 +109,7 @@ describe('AuthController', () => {
 
   // ──────────────── POST /auth/refresh ────────────────
   describe('refresh()', () => {
-    const refreshData = { refreshToken: 'refresh-uuid' } as any;
+    const refreshData = { refreshToken: 'refresh-uuid' } as RefreshRequestBody;
 
     it('delegates to authService.refreshTokens with token and client info', async () => {
       authService.refreshTokens.mockResolvedValue(TOKEN_RESPONSE);

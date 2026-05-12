@@ -1,6 +1,6 @@
 import { extractClientInfo } from '@common/utils/extract-client-info';
 import { BadRequestException } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 
 type RequestOverrides = {
   userAgent?: string;

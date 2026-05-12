@@ -1,6 +1,6 @@
 Currently:
 - Basic MVP of URL shortening mainly to show project/infra setup and deployment process.
-- Currently 301 since our redirects are permanent. Can use 302 for temporary redirects.
+- Currently 302 for URL shortener redirects.
 - Using LLM (copilot) to assist with basic scaffolding + most of the frontend portion.
 
 Going further: 

@@ -1,8 +1,9 @@
 import { UrlController } from '@modules/url/url.controller';
 import { UrlService } from '@modules/url/url.service';
 import { NotFoundException } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { Request, Response } from 'express';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { Request, Response } from 'express';
 
 const makeReq = (userId?: string) =>
   ({

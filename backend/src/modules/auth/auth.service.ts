@@ -6,7 +6,7 @@ import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/co
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ClientInfo } from '@src/common/utils/extract-client-info';
-import type { UserModel } from '@src/generated/prisma/models/User';
+import { UserModel } from '@src/generated/prisma/models/User';
 import { PrismaService } from '@src/prisma.service';
 import * as bcrypt from 'bcrypt';
 

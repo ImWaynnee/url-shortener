@@ -8,16 +8,21 @@ class EnvironmentVariables {
   @Matches(/^(postgresql|postgres):\/\//, { message: 'DATABASE_URL must be a valid PostgreSQL connection string' })
   DATABASE_URL!: string;
 
-  @IsOptional()
   @IsString()
   @Matches(/^redis:\/\//, { message: 'REDIS_URL must be a valid Redis connection string' })
   REDIS_URL!: string;
 
-  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  CACHE_L1_TTL_MS!: number;
+
+  @IsNumber()
+  @Min(0)
+  CACHE_L2_TTL_MS!: number;
+
   @IsUrl({ require_tld: false })
   FRONTEND_URL!: string;
 
-  @IsOptional()
   @IsUrl({ require_tld: true })
   REDIRECT_DOMAIN!: string;
 

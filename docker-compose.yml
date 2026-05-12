@@ -105,6 +105,24 @@ services:
         max-size: '10m'
         max-file: '5'
 
+  redisinsight:
+    container_name: urlshortener_redisinsight
+    image: redis/redisinsight:3.4.2
+    restart: unless-stopped
+    profiles:
+      - tools
+    ports:
+      - '${REDISINSIGHT_PORT:-5540}:5540'
+    depends_on:
+      - redis
+    networks:
+      - urlshortener_network
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '5'
+
 networks:
   urlshortener_network:
     driver: bridge

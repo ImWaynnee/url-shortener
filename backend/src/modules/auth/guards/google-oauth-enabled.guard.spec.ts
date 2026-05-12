@@ -1,7 +1,9 @@
 import { GoogleOAuthEnabledGuard } from '@modules/auth/guards/google-oauth-enabled.guard';
-import { ExecutionContext, NotImplementedException } from '@nestjs/common';
+import type { ExecutionContext} from '@nestjs/common';
+import { NotImplementedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 
 describe('GoogleOAuthEnabledGuard', () => {
   let guard: GoogleOAuthEnabledGuard;
