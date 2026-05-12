@@ -1,9 +1,10 @@
 import { AuthService } from '@modules/auth/auth.service';
 import { GoogleStrategy } from '@modules/auth/strategies/google.strategy';
 import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
-import { UserModel } from '@src/generated/prisma/models/User';
-import { Profile } from 'passport-google-oauth20';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { UserModel } from '@src/generated/prisma/models/User';
+import type { Profile } from 'passport-google-oauth20';
 
 describe('GoogleStrategy', () => {
   let strategy: GoogleStrategy;

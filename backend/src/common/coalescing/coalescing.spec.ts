@@ -1,4 +1,4 @@
-import { ICoalescingService } from '@common/coalescing/coalescing.interface';
+import type { ICoalescingService } from '@common/coalescing/coalescing.interface';
 import { InMemoryCoalescingService } from '@common/coalescing/in-memory-coalescing.service';
 
 /**

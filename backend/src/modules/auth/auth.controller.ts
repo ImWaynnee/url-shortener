@@ -10,8 +10,8 @@ import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { extractClientInfo } from '@src/common/utils/extract-client-info';
-import { UserModel } from '@src/generated/prisma/models/User';
-import { Request, Response } from 'express';
+import type { UserModel } from '@src/generated/prisma/models/User';
+import type { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {

@@ -1,12 +1,13 @@
 import { AuthController } from '@modules/auth/auth.controller';
 import { AuthService } from '@modules/auth/auth.service';
-import { LoginRequestBody } from '@modules/auth/dto/login.request.dto';
-import { RefreshRequestBody } from '@modules/auth/dto/refresh.request.dto';
-import { RegisterRequestBody } from '@modules/auth/dto/register.request.dto';
+import type { LoginRequestBody } from '@modules/auth/dto/login.request.dto';
+import type { RefreshRequestBody } from '@modules/auth/dto/refresh.request.dto';
+import type { RegisterRequestBody } from '@modules/auth/dto/register.request.dto';
 import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
-import { UserModel } from '@src/generated/prisma/models';
-import { Request, Response } from 'express';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { UserModel } from '@src/generated/prisma/models';
+import type { Request, Response } from 'express';
 
 const CLIENT_INFO = {
   deviceInfo: 'TestAgent/1.0',

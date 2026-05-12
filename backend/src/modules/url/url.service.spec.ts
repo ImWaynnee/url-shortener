@@ -3,7 +3,8 @@ import { UrlService } from '@modules/url/url.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { PrismaService } from '@src/prisma.service';
 
 const mockPrismaService = {

@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 
 export interface ClientInfo {
   deviceInfo: string;

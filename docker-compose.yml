@@ -107,7 +107,7 @@ services:
 
   redisinsight:
     container_name: urlshortener_redisinsight
-    image: redis/redisinsight:latest
+    image: redis/redisinsight:3.4.2
     restart: unless-stopped
     profiles:
       - tools

@@ -34,7 +34,7 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
 {
   private readonly emitter = new EventEmitter();
   private readonly channelRefs = new Map<string, number>();
-  private sub!: Redis;
+  private sub: Redis | undefined;
 
   constructor(
     @Inject(COALESCING_REDIS_CLIENT) private readonly redis: Redis,
@@ -51,7 +51,10 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
   }
 
   async onModuleDestroy() {
-    await this.sub.quit();
+    // Quit the subscriber connection first, then the primary client.
+    // Guard for the case where onModuleInit never ran (e.g. in tests).
+    if (this.sub) await this.sub.quit();
+    await this.redis.quit();
   }
 
   async coalesce<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
@@ -66,9 +69,27 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
         const result = await fetcher();
         // SET before PUBLISH so any subscriber that reads resultKey after
         // receiving 'done' is guaranteed to find the value.
-        await this.redis.set(resultKey, JSON.stringify(result), 'PX', LOCK_TTL_MS);
+        const successPayload = JSON.stringify({
+          ok: true,
+          data: result,
+        });
+        await this.redis.set(resultKey, successPayload, 'PX', LOCK_TTL_MS);
         await this.redis.publish(channel, 'done');
         return result;
+      } catch (err) {
+        // Notify waiters of the error so they fail fast with the same underlying
+        // error instead of hanging until the timeout.
+        try {
+          const errorPayload = JSON.stringify({
+            ok: false,
+            error: (err as Error).message,
+          });
+          await this.redis.set(resultKey, errorPayload, 'PX', LOCK_TTL_MS);
+          await this.redis.publish(channel, 'done');
+        } catch {
+          // Redis is down during error handling — waiters will time out. Nothing more we can do.
+        }
+        throw err;
       } finally {
         await this.redis.del(lockKey);
       }
@@ -86,12 +107,17 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
     return new Promise<T>((resolve, reject) => {
       let settled = false;
 
-      const finish = (fn: () => void) => {
+      const finish = (fn: () => void | Promise<void>) => {
         if (settled) return;
         settled = true;
         this.emitter.removeListener(channel, handler);
         void this.unsubscribeChannel(channel);
-        fn();
+        // Wrap in Promise.resolve so both sync throws and async rejections
+        // inside fn() are caught and piped to reject instead of becoming
+        // unhandled promise rejections.
+        void Promise.resolve(fn()).catch((err: unknown) =>
+          reject(err instanceof Error ? err : new Error(String(err))),
+        );
       };
 
       const timeout = setTimeout(() => {
@@ -105,7 +131,7 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
         clearTimeout(timeout);
         finish(async () => {
           const raw = await this.redis.get(resultKey);
-          if (raw) return resolve(JSON.parse(raw) as T);
+          if (raw) return this.settleFromPayload(raw, resolve, reject);
           reject(new Error(`Coalescing: no result found for ${resultKey}`));
         });
       };
@@ -113,16 +139,38 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
       this.emitter.on(channel, handler);
 
       // Race condition fix: check if the lock-holder already published before
-      // our subscribe() completed. If resultKey exists we resolve immediately.
+      // our subscribe() completed. If resultKey exists we settle immediately.
       void this.redis.get(resultKey).then((early: string | null) => {
         if (!early) return;
         clearTimeout(timeout);
-        finish(() => resolve(JSON.parse(early) as T));
+        finish(() => this.settleFromPayload(early, resolve, reject));
       });
     });
   }
 
+  private settleFromPayload<T>(
+    raw: string,
+    resolve: (value: T) => void,
+    reject: (reason: Error) => void,
+  ): void {
+    const payload = JSON.parse(raw) as
+      | {
+        ok: true;
+        data: T;
+      }
+      | {
+        ok: false;
+        error: string;
+      };
+    if (payload.ok) {
+      resolve(payload.data);
+    } else {
+      reject(new Error(payload.error));
+    }
+  }
+
   private async subscribeChannel(channel: string): Promise<void> {
+    if (!this.sub) throw new Error('RedisPubSubCoalescingService: onModuleInit has not run');
     const refs = (this.channelRefs.get(channel) ?? 0) + 1;
     this.channelRefs.set(channel, refs);
     if (refs === 1) await this.sub.subscribe(channel);
@@ -132,7 +180,7 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
     const refs = (this.channelRefs.get(channel) ?? 1) - 1;
     if (refs <= 0) {
       this.channelRefs.delete(channel);
-      await this.sub.unsubscribe(channel);
+      await this.sub?.unsubscribe(channel);
     } else {
       this.channelRefs.set(channel, refs);
     }
