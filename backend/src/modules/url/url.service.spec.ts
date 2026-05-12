@@ -158,5 +158,21 @@ describe('UrlService', () => {
         NotFoundException,
       );
     });
+
+    it('should return cache value populated by a concurrent request inside the coalesced fetcher (rechecked path)', async () => {
+      // Outer cache.get misses → coalescer is entered.
+      // Inside the fetcher, cache.get hits — simulating a concurrent request
+      // that already fetched from DB and populated the cache while we waited.
+      mockCacheManager.get
+        .mockResolvedValueOnce(undefined) // outer miss
+        .mockResolvedValueOnce('https://example.com'); // inner recheck hit
+
+      const result = await service.getOriginalUrl('abc1234');
+
+      expect(mockCacheManager.get).toHaveBeenCalledTimes(2);
+      expect(mockPrismaService.url.findUnique).not.toHaveBeenCalled();
+      expect(mockCacheManager.set).not.toHaveBeenCalled();
+      expect(result).toEqual('https://example.com');
+    });
   });
 });
