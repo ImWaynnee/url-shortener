@@ -1,5 +1,6 @@
+import { apiClient } from '@api/client';
 import { env } from '@config/env';
-import axios from 'axios';
+import axios, { type AxiosResponse } from 'axios';
 import { useEffect, useState } from 'react';
 
 export function useHealthCheck() {
@@ -18,25 +19,20 @@ export function useHealthCheck() {
         if (!cancelled) setIsOnline(false);
       });
 
-    // If any subsequent request succeeds, the backend is reachable — remove the card
-    const interceptorId = axios.interceptors.response.use(
-      (response) => {
-        // Check if the URL belongs to your backend
-        if (response.config.url?.startsWith(env.apiBaseUrl)) {
-          setIsOnline(true);
-        }
+    // If any subsequent request through apiClient succeeds, the backend is reachable — remove the card
+    const interceptorId = apiClient.interceptors.response.use(
+      (response: AxiosResponse) => {
+        setIsOnline(true);
         return response;
       },
-      (error) => {
+      (error: unknown) => {
         // Even if the server returns 401 or 400, it's "Online"
         // Only set to false if there's no response (Network Error/Timeout)
-        if (error.config?.url?.startsWith(env.apiBaseUrl)) {
-          if (!error.response) {
-            setIsOnline(false);
-          } else {
-            // Server responded with a code (4xx, 5xx), so it's reachable
-            setIsOnline(true);
-          }
+        const hasResponse = axios.isAxiosError(error) && error.response;
+        if (hasResponse) {
+          setIsOnline(true);
+        } else {
+          setIsOnline(false);
         }
         return Promise.reject(error);
       }
@@ -44,7 +40,7 @@ export function useHealthCheck() {
 
     return () => {
       cancelled = true;
-      axios.interceptors.response.eject(interceptorId);
+      apiClient.interceptors.response.eject(interceptorId);
     };
   }, []);
 

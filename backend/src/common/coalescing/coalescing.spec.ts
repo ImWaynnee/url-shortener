@@ -1,5 +1,5 @@
-import type { ICoalescingService } from '@common/coalescing/coalescing.interface';
 import { InMemoryCoalescingService } from '@common/coalescing/in-memory-coalescing.service';
+import type { ICoalescingService } from '@common/coalescing/interfaces/coalescing.interface';
 
 /**
  * NoOpCoalescingService — the "without coalescing" baseline.
@@ -26,7 +26,7 @@ function makeSlowFetcher(delayMs: number): {
         count++;
         setTimeout(() => resolve('result'), delayMs);
       }),
-    callCount: () => count,
+    callCount: () => count
   };
 }
 
@@ -43,7 +43,7 @@ describe('Coalescing — negative case: without vs. with', () => {
     const { fetcher, callCount } = makeSlowFetcher(20);
 
     await Promise.all(
-      Array.from({ length: 10 }, () => noop.coalesce('key', fetcher)),
+      Array.from({ length: 10 }, () => noop.coalesce('key', fetcher))
     );
 
     expect(callCount()).toBe(10); // every caller hit the fetcher
@@ -60,7 +60,7 @@ describe('Coalescing — negative case: without vs. with', () => {
     const { fetcher, callCount } = makeSlowFetcher(20);
 
     const results = await Promise.all(
-      Array.from({ length: 10 }, () => service.coalesce('key', fetcher)),
+      Array.from({ length: 10 }, () => service.coalesce('key', fetcher))
     );
 
     expect(callCount()).toBe(1); // fetcher called exactly once
@@ -77,7 +77,7 @@ describe('Coalescing — negative case: without vs. with', () => {
 
     // First wave — all coalesced into one
     await Promise.all(
-      Array.from({ length: 5 }, () => service.coalesce('key', fetcher)),
+      Array.from({ length: 5 }, () => service.coalesce('key', fetcher))
     );
 
     expect(callCount()).toBe(1);
@@ -101,7 +101,7 @@ describe('Coalescing — negative case: without vs. with', () => {
       service.coalesce('keyA', fetcherA),
       service.coalesce('keyA', fetcherA),
       service.coalesce('keyB', fetcherB),
-      service.coalesce('keyB', fetcherB),
+      service.coalesce('keyB', fetcherB)
     ]);
 
     expect(countA()).toBe(1); // keyA coalesced into one

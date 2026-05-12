@@ -1,4 +1,4 @@
-import { ICoalescingService } from '@common/coalescing/coalescing.interface';
+import { ICoalescingService } from '@common/coalescing/interfaces/coalescing.interface';
 import { Injectable } from '@nestjs/common';
 
 /**

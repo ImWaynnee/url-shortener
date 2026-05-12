@@ -1,4 +1,4 @@
-import { COALESCING_REDIS_CLIENT, ICoalescingService } from '@common/coalescing/coalescing.interface';
+import { COALESCING_REDIS_CLIENT, ICoalescingService } from '@common/coalescing/interfaces/coalescing.interface';
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { EventEmitter } from 'events';
 import Redis from 'ioredis';
@@ -47,7 +47,7 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
   private sub: Redis | undefined;
 
   constructor(
-    @Inject(COALESCING_REDIS_CLIENT) private readonly redis: Redis,
+    @Inject(COALESCING_REDIS_CLIENT) private readonly redis: Redis
   ) {
     // Allow many concurrent waiters without Node.js printing a MaxListeners warning.
     this.emitter.setMaxListeners(0);
@@ -56,7 +56,7 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
   onModuleInit() {
     this.sub = this.redis.duplicate();
     this.sub.on('message', (channel: string, msg: string) =>
-      this.emitter.emit(channel, msg),
+      this.emitter.emit(channel, msg)
     );
   }
 
@@ -81,7 +81,7 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
         // receiving 'done' is guaranteed to find the value.
         const successPayload = JSON.stringify({
           ok: true,
-          data: result,
+          data: result
         });
         await this.redis.set(resultKey, successPayload, 'PX', LOCK_TTL_MS);
         await this.redis.publish(channel, 'done');
@@ -92,7 +92,7 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
         try {
           const errorPayload = JSON.stringify({
             ok: false,
-            error: (err as Error).message,
+            error: (err as Error).message
           });
           await this.redis.set(resultKey, errorPayload, 'PX', LOCK_TTL_MS);
           await this.redis.publish(channel, 'done');
@@ -110,7 +110,7 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
 
   private async waitForNotification<T>(
     channel: string,
-    resultKey: string,
+    resultKey: string
   ): Promise<T> {
     await this.subscribeChannel(channel);
 
@@ -123,13 +123,13 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
         this.emitter.removeListener(channel, handler);
         void this.unsubscribeChannel(channel);
         void Promise.resolve(fn()).catch((err: unknown) =>
-          reject(err instanceof Error ? err : new Error(String(err))),
+          reject(err instanceof Error ? err : new Error(String(err)))
         );
       };
 
       const timeout = setTimeout(() => {
         finish(() =>
-          reject(new Error(`Coalescing timed out on channel ${channel}`)),
+          reject(new Error(`Coalescing timed out on channel ${channel}`))
         );
       }, LOCK_TTL_MS);
 
@@ -158,7 +158,7 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
   private settleFromPayload<T>(
     raw: string,
     resolve: (value: T) => void,
-    reject: (reason: Error) => void,
+    reject: (reason: Error) => void
   ): void {
     const payload: CoalescingPayload<T> = JSON.parse(raw) as CoalescingPayload<T>;
     if (payload.ok === true) {

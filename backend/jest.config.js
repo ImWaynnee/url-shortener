@@ -1,6 +1,7 @@
 process.env.TZ = 'UTC';
 
 module.exports = {
+  setupFiles: ['reflect-metadata'],
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: 'src',
   testRegex: '.*\\.spec\\.ts$',
@@ -29,5 +30,6 @@ module.exports = {
     '^@modules/(.*)$': '<rootDir>/modules/$1',
     '^@config/(.*)$': '<rootDir>/config/$1',
     '^@guards/(.*)$': '<rootDir>/common/guards/$1',
-  },
+    '^@factories/(.*)$': '<rootDir>/test/factories/$1',
+  }
 };

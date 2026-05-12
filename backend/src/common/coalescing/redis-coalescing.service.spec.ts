@@ -1,4 +1,4 @@
-import { COALESCING_REDIS_CLIENT } from '@common/coalescing/coalescing.interface';
+import { COALESCING_REDIS_CLIENT } from '@common/coalescing/interfaces/coalescing.interface';
 import { RedisPubSubCoalescingService } from '@common/coalescing/redis-coalescing.service';
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
@@ -28,7 +28,7 @@ function makeRedisMock() {
     del: jest.fn(),
     publish: jest.fn().mockResolvedValue(1),
     quit: jest.fn().mockResolvedValue('OK'),
-    duplicate: jest.fn().mockReturnValue(sub),
+    duplicate: jest.fn().mockReturnValue(sub)
   };
 
   return {
@@ -73,8 +73,8 @@ describe('RedisPubSubCoalescingService', () => {
         {
           provide: COALESCING_REDIS_CLIENT,
           useValue: redis 
-        },
-      ],
+        }
+      ]
     }).compile();
 
     service = module.get(RedisPubSubCoalescingService);
@@ -122,13 +122,13 @@ describe('RedisPubSubCoalescingService', () => {
       const result = await service.coalesce('myKey', async () => 'hello');
 
       expect(redis.set).toHaveBeenCalledWith(
-        'lock:myKey', '1', 'EX', expect.any(Number), 'NX',
+        'lock:myKey', '1', 'EX', expect.any(Number), 'NX'
       );
       expect(redis.set).toHaveBeenCalledWith(
         'result:myKey',
         makeSuccessPayload('hello'),
         'PX',
-        expect.any(Number),
+        expect.any(Number)
       );
       expect(redis.publish).toHaveBeenCalledWith('notify:myKey', 'done');
       expect(redis.del).toHaveBeenCalledWith('lock:myKey');
@@ -152,14 +152,14 @@ describe('RedisPubSubCoalescingService', () => {
       await expect(
         service.coalesce('myKey', async () => {
           throw new Error('boom');
-        }),
+        })
       ).rejects.toThrow('boom');
 
       expect(redis.set).toHaveBeenCalledWith(
         'result:myKey',
         makeErrorPayload('boom'),
         'PX',
-        expect.any(Number),
+        expect.any(Number)
       );
       expect(redis.publish).toHaveBeenCalledWith('notify:myKey', 'done');
     });
@@ -173,7 +173,7 @@ describe('RedisPubSubCoalescingService', () => {
       await expect(
         service.coalesce('myKey', async () => {
           throw new Error('original error');
-        }),
+        })
       ).rejects.toThrow('original error');
     });
   });
@@ -295,6 +295,44 @@ describe('RedisPubSubCoalescingService', () => {
       expect(sub.subscribe).toHaveBeenCalledTimes(1); // one Redis subscribe
       expect(results).toEqual(['shared', 'shared', 'shared']);
     });
+
+    it('should ignore non-done messages on the notification channel', async () => {
+      // Lock is held, no early result
+      redis.get.mockResolvedValue(null);
+
+      const promise = service.coalesce<string>('myKey', jest.fn());
+
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // Emit a non-'done' message on the correct channel — handler should ignore it
+      sub.emit('message', 'notify:myKey', 'heartbeat');
+
+      // Promise is still pending — now resolve with the real 'done'
+      redis.get.mockResolvedValue(makeSuccessPayload('final'));
+      sub.emit('message', 'notify:myKey', 'done');
+
+      await expect(promise).resolves.toBe('final');
+    });
+
+    it('should not settle twice when early-result and pub/sub notification both fire', async () => {
+      // Early result is available immediately after subscribe
+      redis.get.mockResolvedValue(makeSuccessPayload('early'));
+
+      const promise = service.coalesce<string>('myKey', jest.fn());
+
+      // Flush enough microtasks for early-result path to call finish() and settle the promise
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // Emit 'done' after the promise is already settled — handler calls finish() again,
+      // which must hit the `if (settled) return;` guard silently
+      sub.emit('message', 'notify:myKey', 'done');
+
+      await expect(promise).resolves.toBe('early');
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -309,7 +347,7 @@ describe('RedisPubSubCoalescingService', () => {
       redis.get.mockResolvedValue(null);
 
       await expect(bare.coalesce('key', jest.fn())).rejects.toThrow(
-        'RedisPubSubCoalescingService: onModuleInit has not run',
+        'RedisPubSubCoalescingService: onModuleInit has not run'
       );
     });
   });

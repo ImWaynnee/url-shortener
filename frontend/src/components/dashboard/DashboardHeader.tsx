@@ -1,4 +1,5 @@
 import { useAuth } from '@hooks/useAuth';
+import { ChevronDown, LogOut } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -45,7 +46,7 @@ export function DashboardHeader() {
           <span className="hidden sm:block text-sm font-medium text-gray-700 max-w-[160px] truncate">
             {displayName}
           </span>
-          <ChevronDownIcon />
+          <ChevronDown size={16} className="text-gray-400" />
         </button>
 
         {open && (
@@ -68,7 +69,7 @@ export function DashboardHeader() {
               onClick={handleLogout}
               className="w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
             >
-              <LogOutIcon />
+              <LogOut size={16} />
               Sign out
             </button>
           </div>
@@ -78,20 +79,3 @@ export function DashboardHeader() {
   );
 }
 
-function ChevronDownIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
-  );
-}
-
-function LogOutIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  );
-}

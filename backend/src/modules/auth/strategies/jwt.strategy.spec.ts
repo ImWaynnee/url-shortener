@@ -1,4 +1,4 @@
-import type { JwtPayload} from '@modules/auth/strategies/jwt.strategy';
+import type { JwtPayload } from '@modules/auth/interfaces/jwt.interface';
 import { JwtStrategy } from '@modules/auth/strategies/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
 import type { TestingModule } from '@nestjs/testing';
@@ -15,10 +15,10 @@ describe('JwtStrategy', () => {
         {
           provide: ConfigService,
           useValue: {
-            getOrThrow: jest.fn().mockReturnValue('test-secret'),
-          },
-        },
-      ],
+            getOrThrow: jest.fn().mockReturnValue('test-secret')
+          }
+        }
+      ]
     }).compile();
 
     strategy = module.get<JwtStrategy>(JwtStrategy);
@@ -33,13 +33,13 @@ describe('JwtStrategy', () => {
       const payload: JwtPayload = {
         sub: 'user-uuid',
         email: 'alice@example.com',
-        fullName: 'Alice', 
+        fullName: 'Alice' 
       };
       const result = strategy.validate(payload);
       expect(result).toEqual({
         userId: 'user-uuid',
         email: 'alice@example.com',
-        fullName: 'Alice',
+        fullName: 'Alice'
       });
     });
   });

@@ -1,5 +1,5 @@
-import type { CoalescingRedisClient } from '@common/coalescing/coalescing.interface';
-import { COALESCING_REDIS_CLIENT } from '@common/coalescing/coalescing.interface';
+import type { CoalescingRedisClient } from '@common/coalescing/interfaces/coalescing.interface';
+import { COALESCING_REDIS_CLIENT } from '@common/coalescing/interfaces/coalescing.interface';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -29,9 +29,9 @@ async function bootstrap() {
           httpOnly: true,
           secure: configService.get('NODE_ENV') === 'production',
           sameSite: 'lax',
-          maxAge: 10 * 60 * 1000, // 10 minutes — just long enough for the OAuth round-trip
-        },
-      }),
+          maxAge: 10 * 60 * 1000 // 10 minutes — just long enough for the OAuth round-trip
+        }
+      })
     );
   }
 
@@ -43,7 +43,7 @@ async function bootstrap() {
       configService.get<string>('FRONTEND_URL')
     ] as string[],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    credentials: true,
+    credentials: true
   });
 
   app.useGlobalPipes(
@@ -51,7 +51,7 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true 
-    }),
+    })
   );
 
   // Startup cache health check

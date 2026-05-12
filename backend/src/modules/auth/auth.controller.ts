@@ -1,3 +1,4 @@
+import { extractClientInfo } from '@common/utils/extract-client-info';
 import { JwtAuthGuard } from '@guards/jwt-auth.guard';
 import { AuthService } from '@modules/auth/auth.service';
 import { LoginRequestBody } from '@modules/auth/dto/login.request.dto';
@@ -5,11 +6,10 @@ import { RefreshRequestBody } from '@modules/auth/dto/refresh.request.dto';
 import { RegisterRequestBody } from '@modules/auth/dto/register.request.dto';
 import { GoogleAuthGuard, GoogleCallbackGuard } from '@modules/auth/guards/google-auth.guard';
 import { GoogleOAuthEnabledGuard } from '@modules/auth/guards/google-oauth-enabled.guard';
-import { JwtUser } from '@modules/auth/strategies/jwt.strategy';
+import { JwtUser } from '@modules/auth/interfaces/jwt.interface';
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
-import { extractClientInfo } from '@src/common/utils/extract-client-info';
 import type { UserModel } from '@src/generated/prisma/models/User';
 import type { Request, Response } from 'express';
 
@@ -17,7 +17,7 @@ import type { Request, Response } from 'express';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {}
 
   @Post('register')
@@ -47,7 +47,7 @@ export class AuthController {
   async googleCallback(@Req() req: Request, @Res() res: Response) {
     const { accessToken, refreshToken } = await this.authService.loginWithGoogle(
       req.user as UserModel,
-      extractClientInfo(req),
+      extractClientInfo(req)
     );
     const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
     return res.redirect(`${frontendUrl}/auth/callback?access_token=${accessToken}&refresh_token=${refreshToken}`);

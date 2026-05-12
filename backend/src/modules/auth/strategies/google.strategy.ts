@@ -8,14 +8,14 @@ import { Profile, Strategy } from 'passport-google-oauth20';
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
     private configService: ConfigService,
-    private authService: AuthService,
+    private authService: AuthService
   ) {
     super({
       clientID: configService.getOrThrow<string>('GOOGLE_OAUTH_CLIENT_ID'),
       clientSecret: configService.getOrThrow<string>('GOOGLE_OAUTH_CLIENT_SECRET'),
       callbackURL: configService.getOrThrow<string>('GOOGLE_OAUTH_REDIRECT_URI'),
       scope: ['email', 'profile'],
-      state: true,
+      state: true
     });
   }
 
@@ -25,7 +25,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     return this.authService.findOrCreateGoogleUser({
       email: profile.emails?.[0]?.value,
       fullName: profile.displayName,
-      providerUserId: profile.id,
+      providerUserId: profile.id
     });
   }
 }

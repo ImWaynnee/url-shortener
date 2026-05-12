@@ -1,3 +1,4 @@
+import { ChevronLeft, Home, Menu } from 'lucide-react';
 import { Link, useMatch } from 'react-router';
 
 interface NavItem {
@@ -14,7 +15,7 @@ interface SidebarProps {
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const navItems: NavItem[] = [
     {
-      icon: <HomeIcon />,
+      icon: <Home size={20} />,
       label: 'Home',
       path: '/dashboard/home',
     },
@@ -38,7 +39,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {collapsed ? <MenuIcon /> : <ChevronLeftIcon />}
+          {collapsed ? <Menu size={20} /> : <ChevronLeft size={20} />}
         </button>
       </div>
 
@@ -49,15 +50,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         ))}
       </nav>
     </aside>
-  );
-}
-
-function HomeIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
   );
 }
 
@@ -86,20 +78,3 @@ function NavLink({ item, collapsed }: { item: NavItem;
   );
 }
 
-function MenuIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="3" y1="12" x2="21" y2="12" />
-      <line x1="3" y1="6" x2="21" y2="6" />
-      <line x1="3" y1="18" x2="21" y2="18" />
-    </svg>
-  );
-}
-
-function ChevronLeftIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="15 18 9 12 15 6" />
-    </svg>
-  );
-}
