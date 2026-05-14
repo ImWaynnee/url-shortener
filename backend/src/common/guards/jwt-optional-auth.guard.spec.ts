@@ -1,6 +1,6 @@
+import { JwtOptionalAuthGuard } from '@common/guards/jwt-optional-auth.guard';
 import type { ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { JwtOptionalAuthGuard } from '@src/common/guards/jwt-optional-auth.guard';
 
 describe('JwtOptionalAuthGuard', () => {
   it('should be defined', () => {

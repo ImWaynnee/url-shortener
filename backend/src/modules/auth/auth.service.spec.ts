@@ -1,3 +1,4 @@
+import type { ClientInfo } from '@common/interfaces/client-info.interface';
 import { AuthService } from '@modules/auth/auth.service';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -10,8 +11,9 @@ import * as bcrypt from 'bcrypt';
 
 const CLIENT_INFO = {
   deviceInfo: 'TestAgent/1.0',
-  ipAddress: '127.0.0.1' 
-};
+  ipAddress: '127.0.0.1',
+  referrer: null
+} as ClientInfo;
 
 const MOCK_USER = {
   id: 'user-uuid',
@@ -24,20 +26,20 @@ function buildPrismaMock() {
     user: {
       findUnique: jest.fn(),
       create: jest.fn(),
-      update: jest.fn(),
+      update: jest.fn()
     },
     userAuthProvider: {
       findFirst: jest.fn(),
       findFirstOrThrow: jest.fn(),
-      create: jest.fn(),
+      create: jest.fn()
     },
     userRefreshToken: {
       findUnique: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
-      updateMany: jest.fn(),
+      updateMany: jest.fn()
     },
-    $transaction: jest.fn(),
+    $transaction: jest.fn()
   };
 }
 
@@ -65,9 +67,9 @@ describe('AuthService', () => {
         },
         {
           provide: ConfigService,
-          useValue: { get: jest.fn().mockReturnValue(604800) },
-        },
-      ],
+          useValue: { get: jest.fn().mockReturnValue(604800) }
+        }
+      ]
     }).compile();
 
     service = module.get<AuthService>(AuthService);
@@ -125,7 +127,7 @@ describe('AuthService', () => {
     it('throws with "Account already exists" message', async () => {
       prisma.user.findUnique.mockResolvedValue(MOCK_USER);
       await expect(service.register(registrationData, CLIENT_INFO)).rejects.toThrow(
-        'Account already exists, try logging in.',
+        'Account already exists, try logging in.'
       );
     });
 
@@ -272,7 +274,7 @@ describe('AuthService', () => {
         revokedAt: null,
         expiresAt: futureExpiry,
         user: MOCK_USER,
-        ...overrides,
+        ...overrides
       };
     }
 
@@ -284,7 +286,7 @@ describe('AuthService', () => {
     it('throws UnauthorizedException when token row does not exist', async () => {
       prisma.userRefreshToken.findUnique.mockResolvedValue(null);
       await expect(service.refreshTokens(validToken, CLIENT_INFO)).rejects.toThrow(
-        UnauthorizedException,
+        UnauthorizedException
       );
     });
 
@@ -299,13 +301,13 @@ describe('AuthService', () => {
         buildRow({
           isRevoked: true,
           revokedAt 
-        }),
+        })
       );
       prisma.userRefreshToken.updateMany.mockResolvedValue({ count: 1 });
 
       await expect(service.refreshTokens(validToken, CLIENT_INFO)).rejects.toThrow('Token already used');
       expect(prisma.userRefreshToken.updateMany).toHaveBeenCalledWith(
-        expect.objectContaining({ data: expect.objectContaining({ isRevoked: true }) }),
+        expect.objectContaining({ data: expect.objectContaining({ isRevoked: true }) })
       );
     });
 
@@ -315,7 +317,7 @@ describe('AuthService', () => {
         buildRow({
           isRevoked: true,
           revokedAt 
-        }),
+        })
       );
 
       await expect(service.refreshTokens(validToken, CLIENT_INFO)).rejects.toThrow('Invalid session');
@@ -324,7 +326,7 @@ describe('AuthService', () => {
 
     it('throws "Session expired" when token has expired', async () => {
       prisma.userRefreshToken.findUnique.mockResolvedValue(
-        buildRow({ expiresAt: new Date(Date.now() - 1_000) }),
+        buildRow({ expiresAt: new Date(Date.now() - 1_000) })
       );
       await expect(service.refreshTokens(validToken, CLIENT_INFO)).rejects.toThrow('Session expired');
     });
@@ -338,7 +340,7 @@ describe('AuthService', () => {
       expect(typeof result.refreshToken).toBe('string');
       // Old token must be revoked
       expect(prisma.userRefreshToken.update).toHaveBeenCalledWith(
-        expect.objectContaining({ data: expect.objectContaining({ isRevoked: true }) }),
+        expect.objectContaining({ data: expect.objectContaining({ isRevoked: true }) })
       );
       // New token record must be created
       expect(prisma.userRefreshToken.create).toHaveBeenCalledTimes(1);
@@ -350,7 +352,7 @@ describe('AuthService', () => {
       expect(jwtService.sign).toHaveBeenCalledWith({
         sub: MOCK_USER.id,
         email: MOCK_USER.email,
-        fullName: MOCK_USER.fullName,
+        fullName: MOCK_USER.fullName
       });
     });
 
@@ -360,12 +362,12 @@ describe('AuthService', () => {
         fullName: null 
       };
       prisma.userRefreshToken.findUnique.mockResolvedValue(
-        buildRow({ user: userWithoutName }),
+        buildRow({ user: userWithoutName })
       );
       await service.refreshTokens(validToken, CLIENT_INFO);
       expect(jwtService.sign).toHaveBeenCalledWith({
         sub: userWithoutName.id,
-        email: userWithoutName.email,
+        email: userWithoutName.email
       });
       const signArg = (jwtService.sign as jest.Mock).mock.calls[0][0];
       expect(signArg).not.toHaveProperty('fullName');

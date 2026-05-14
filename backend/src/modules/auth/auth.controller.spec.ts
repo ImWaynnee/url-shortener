@@ -1,5 +1,7 @@
+import type { ClientInfo } from '@common/interfaces/client-info.interface';
 import { AuthController } from '@modules/auth/auth.controller';
 import { AuthService } from '@modules/auth/auth.service';
+import type { AuthTokenResponse } from '@modules/auth/dto/auth.response.dto';
 import type { LoginRequestBody } from '@modules/auth/dto/login.request.dto';
 import type { RefreshRequestBody } from '@modules/auth/dto/refresh.request.dto';
 import type { RegisterRequestBody } from '@modules/auth/dto/register.request.dto';
@@ -11,12 +13,15 @@ import type { Request, Response } from 'express';
 
 const CLIENT_INFO = {
   deviceInfo: 'TestAgent/1.0',
-  ipAddress: '127.0.0.1' 
-};
+  ipAddress: '127.0.0.1',
+  referrer: null
+} as ClientInfo;
+
 const TOKEN_RESPONSE = {
   accessToken: 'signed-jwt',
   refreshToken: 'refresh-uuid' 
-};
+} as AuthTokenResponse;
+
 const MOCK_USER = {
   id: 'user-uuid',
   email: 'alice@example.com' 
@@ -30,7 +35,7 @@ function buildRequest(overrides: Partial<Request> = {}): Request {
     },
     ip: CLIENT_INFO.ipAddress,
     user: MOCK_USER,
-    ...overrides,
+    ...overrides
   } as unknown as Request;
 }
 
@@ -49,14 +54,14 @@ describe('AuthController', () => {
             register: jest.fn(),
             login: jest.fn(),
             refreshTokens: jest.fn(),
-            loginWithGoogle: jest.fn(),
-          },
+            loginWithGoogle: jest.fn()
+          }
         },
         {
           provide: ConfigService,
-          useValue: { getOrThrow: jest.fn() },
-        },
-      ],
+          useValue: { getOrThrow: jest.fn() }
+        }
+      ]
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
@@ -144,7 +149,7 @@ describe('AuthController', () => {
       await controller.googleCallback(req, res);
 
       expect(redirectMock).toHaveBeenCalledWith(
-        'https://app.example.com/auth/callback?access_token=signed-jwt&refresh_token=refresh-uuid',
+        'https://app.example.com/auth/callback?access_token=signed-jwt&refresh_token=refresh-uuid'
       );
     });
   });

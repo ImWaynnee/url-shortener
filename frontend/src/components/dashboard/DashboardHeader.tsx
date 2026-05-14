@@ -1,8 +1,13 @@
 import { useAuth } from '@hooks/useAuth';
+import { ChevronDown, LogOut, Menu } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+  onMobileMenuToggle: () => void;
+}
+
+export function DashboardHeader({ onMobileMenuToggle }: DashboardHeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -26,9 +31,16 @@ export function DashboardHeader() {
   const displayName = user?.fullName ?? user?.email?.split('@')[0] ?? '';
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shrink-0 shadow-sm">
+    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm">
       <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold text-gray-700">Dashboard</span>
+        <button
+          onClick={onMobileMenuToggle}
+          className="md:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+          aria-label="Open navigation menu"
+        >
+          <Menu size={20} />
+        </button>
+        <span className="text-sm font-semibold text-gray-700">Account Dashboard</span>
       </div>
 
       {/* Account menu */}
@@ -45,13 +57,13 @@ export function DashboardHeader() {
           <span className="hidden sm:block text-sm font-medium text-gray-700 max-w-[160px] truncate">
             {displayName}
           </span>
-          <ChevronDownIcon />
+          <ChevronDown size={16} className="text-gray-600" />
         </button>
 
         {open && (
-          <div className="absolute right-0 top-full mt-1 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+          <div className="absolute right-0 top-full mt-1 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50">
             {/* Identity block */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
               <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-semibold select-none shrink-0">
                 {initial}
               </div>
@@ -68,7 +80,7 @@ export function DashboardHeader() {
               onClick={handleLogout}
               className="w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
             >
-              <LogOutIcon />
+              <LogOut size={16} />
               Sign out
             </button>
           </div>
@@ -78,20 +90,3 @@ export function DashboardHeader() {
   );
 }
 
-function ChevronDownIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
-  );
-}
-
-function LogOutIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  );
-}

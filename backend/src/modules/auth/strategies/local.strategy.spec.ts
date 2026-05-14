@@ -16,7 +16,7 @@ describe('LocalStrategy', () => {
     lastLoginAt: null,
     lastLoginProvider: null,
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
-    updatedAt: null,
+    updatedAt: null
   };
 
   beforeEach(async () => {
@@ -25,9 +25,9 @@ describe('LocalStrategy', () => {
         LocalStrategy,
         {
           provide: AuthService,
-          useValue: { validateLocalUser: jest.fn() },
-        },
-      ],
+          useValue: { validateLocalUser: jest.fn() }
+        }
+      ]
     }).compile();
 
     strategy = module.get<LocalStrategy>(LocalStrategy);
@@ -48,14 +48,14 @@ describe('LocalStrategy', () => {
     it('throws UnauthorizedException when credentials are invalid', async () => {
       (authService.validateLocalUser as jest.Mock).mockResolvedValue(null);
       await expect(strategy.validate('alice@example.com', 'wrong-pass')).rejects.toThrow(
-        UnauthorizedException,
+        UnauthorizedException
       );
     });
 
     it('throws with message "Invalid credentials"', async () => {
       (authService.validateLocalUser as jest.Mock).mockResolvedValue(null);
       await expect(strategy.validate('alice@example.com', 'wrong-pass')).rejects.toThrow(
-        'Invalid credentials',
+        'Invalid credentials'
       );
     });
   });

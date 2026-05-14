@@ -1,11 +1,11 @@
 import { createHash, randomUUID } from 'node:crypto';
 
-import { AuthTokenResponse } from '@modules/auth/dto/auth-token.response.dto';
+import { ClientInfo } from '@common/interfaces/client-info.interface';
+import { AuthTokenResponse } from '@modules/auth/dto/auth.response.dto';
 import { RegisterRequestBody } from '@modules/auth/dto/register.request.dto';
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { ClientInfo } from '@src/common/utils/extract-client-info';
 import { UserModel } from '@src/generated/prisma/models/User';
 import { PrismaService } from '@src/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -15,7 +15,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {}
 
   async validateLocalUser(email: string, password: string): Promise<UserModel | null> {
@@ -26,7 +26,7 @@ export class AuthService {
       where: {
         userId: user.id,
         provider: 'local' 
-      },
+      }
     });
     if (!provider?.secret) return null;
 
@@ -53,9 +53,9 @@ export class AuthService {
             create: {
               provider: 'local',
               secret: hash 
-            },
-          },
-        },
+            }
+          }
+        }
       });
     });
 
@@ -68,14 +68,14 @@ export class AuthService {
         where: {
           userId: user.id,
           provider: 'local' 
-        },
+        }
       });
       await tx.user.update({
         where: { id: user.id },
         data: {
           lastLoginAt: new Date(),
           lastLoginProvider: 'local' 
-        },
+        }
       });
     });
 
@@ -93,7 +93,7 @@ export class AuthService {
           provider: 'google',
           providerUserId: profile.providerUserId 
         },
-        include: { user: true },
+        include: { user: true }
       });
 
       let user: UserModel;
@@ -111,8 +111,8 @@ export class AuthService {
           user = await tx.user.create({
             data: {
               email: profile.email!,
-              fullName: profile.fullName,
-            },
+              fullName: profile.fullName
+            }
           });
         }
 
@@ -120,8 +120,8 @@ export class AuthService {
           data: {
             userId: user.id,
             provider: 'google',
-            providerUserId: profile.providerUserId,
-          },
+            providerUserId: profile.providerUserId
+          }
         });
       }
 
@@ -130,7 +130,7 @@ export class AuthService {
         data: {
           lastLoginAt: new Date(),
           lastLoginProvider: 'google' 
-        },
+        }
       });
 
       return user;
@@ -146,7 +146,7 @@ export class AuthService {
 
     const row = await this.prisma.userRefreshToken.findUnique({
       where: { tokenHash },
-      include: { user: true },
+      include: { user: true }
     });
 
     if (!row) {
@@ -171,7 +171,7 @@ export class AuthService {
         data: {
           isRevoked: true,
           revokedAt: new Date() 
-        },
+        }
       });
       throw new UnauthorizedException('Token already used');
     }
@@ -194,7 +194,7 @@ export class AuthService {
         data: {
           isRevoked: true,
           revokedAt: new Date() 
-        },
+        }
       });
       await tx.userRefreshToken.create({
         data: {
@@ -202,8 +202,8 @@ export class AuthService {
           tokenHash: newHash,
           expiresAt: this.refreshTokenExpiresAt,
           deviceInfo: clientInfo.deviceInfo,
-          ipAddress: clientInfo.ipAddress,
-        },
+          ipAddress: clientInfo.ipAddress
+        }
       });
     });
 
@@ -211,9 +211,9 @@ export class AuthService {
       accessToken: this.jwtService.sign({
         sub: row.user.id,
         email: row.user.email,
-        ...(row.user.fullName ? { fullName: row.user.fullName } : {}),
+        ...(row.user.fullName ? { fullName: row.user.fullName } : {})
       }),
-      refreshToken: newRefreshToken,
+      refreshToken: newRefreshToken
     };
   }
 
@@ -225,7 +225,7 @@ export class AuthService {
     user: { id: string;
       email: string;
       fullName?: string | null },
-    clientInfo: ClientInfo,
+    clientInfo: ClientInfo
   ): Promise<AuthTokenResponse> {
     const refreshToken = randomUUID();
     const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
@@ -236,17 +236,17 @@ export class AuthService {
         tokenHash,
         expiresAt: this.refreshTokenExpiresAt,
         deviceInfo: clientInfo.deviceInfo,
-        ipAddress: clientInfo.ipAddress,
-      },
+        ipAddress: clientInfo.ipAddress
+      }
     });
 
     return {
       accessToken: this.jwtService.sign({
         sub: user.id,
         email: user.email,
-        ...(user.fullName ? { fullName: user.fullName } : {}),
+        ...(user.fullName ? { fullName: user.fullName } : {})
       }),
-      refreshToken: refreshToken,
+      refreshToken: refreshToken
     };
   }
 }

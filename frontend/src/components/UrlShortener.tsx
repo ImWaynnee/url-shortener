@@ -1,11 +1,10 @@
 import { apiClient } from '@api/client';
-import { env } from '@config/env';
 import axios from 'axios';
 import { useState } from 'react';
 
 interface ShortenResponse {
   shortUrl: string;
-  originalUrl: string;
+  destinationUrl: string;
   newUrl: string;
 }
 
@@ -31,6 +30,7 @@ export default function UrlShortener() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedPreview, setCopiedPreview] = useState(false);
 
   async function handleShorten() {
     setError('');
@@ -46,8 +46,8 @@ export default function UrlShortener() {
     setLoading(true);
     try {
       const { data } = await apiClient.post<ShortenResponse>(
-        `${env.apiBaseUrl}/urls/shorten`,
-        { url: normalized },
+        `/urls/shorten`,
+        { url: normalized }
       );
       setResult(data);
     } catch (err) {
@@ -75,6 +75,13 @@ export default function UrlShortener() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  async function handleCopyPreview() {
+    if (!result) return;
+    await navigator.clipboard.writeText(`${result.newUrl}+`);
+    setCopiedPreview(true);
+    setTimeout(() => setCopiedPreview(false), 2000);
+  }
+
   return (
     <div className="w-full max-w-lg bg-white rounded-2xl shadow-lg p-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">URL Shortener</h1>
@@ -82,25 +89,25 @@ export default function UrlShortener() {
         Paste any URL and get a short one instantly.
       </p>
 
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <input
           type="url"
           value={inputUrl}
           onChange={(e) => setInputUrl(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleShorten()}
           placeholder="https://www.example.com/very/long/url"
-          className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 min-w-0 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
           onClick={handleShorten}
           disabled={loading}
-          className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
         >
           {loading ? 'Shortening…' : 'Shorten'}
         </button>
       </div>
 
-      <div className="mt-3 min-h-[1.25rem]">
+      <div className="mt-3">
         {error && <p className="text-sm text-red-600">{error}</p>}
       </div>
 
@@ -108,19 +115,25 @@ export default function UrlShortener() {
         <div className="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <p className="text-xs text-gray-500 mb-1">Your shortened URL</p>
           <div className="flex items-center gap-2">
-            <a
-              href={result.newUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 font-medium text-sm hover:underline truncate flex-1"
-            >
+            <span className="text-xs text-gray-800 font-mono bg-gray-100 rounded px-2 py-1 inline-block truncate flex-1">
               {result.newUrl.replace(/^https?:\/\//, '')}
-            </a>
+            </span>
+          </div>
+          <div className="flex items-center gap-2 mt-2">
             <button
               onClick={handleCopy}
-              className="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-md transition-colors shrink-0"
+              aria-label="Copy short URL"
+              className="btn-ghost flex-1 text-xs hover:bg-gray-200 px-3 py-1.5 rounded-md transition-colors font-medium"
             >
               {copied ? 'Copied!' : 'Copy'}
+            </button>
+            <button
+              onClick={handleCopyPreview}
+              aria-label="Copy short URL with preview suffix"
+              title="Appends '+' — opens a preview page before redirecting"
+              className="btn-ghost flex-1 text-xs hover:bg-gray-200 px-3 py-1.5 rounded-md transition-colors font-medium"
+            >
+              {copiedPreview ? 'Copied!' : 'Copy with Preview'}
             </button>
           </div>
         </div>

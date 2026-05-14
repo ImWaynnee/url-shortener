@@ -17,7 +17,7 @@ describe('GoogleStrategy', () => {
     lastLoginAt: null,
     lastLoginProvider: null,
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
-    updatedAt: null,
+    updatedAt: null
   };
 
   beforeEach(async () => {
@@ -27,14 +27,14 @@ describe('GoogleStrategy', () => {
         {
           provide: ConfigService,
           useValue: {
-            getOrThrow: jest.fn().mockReturnValue('fake-value'),
-          },
+            getOrThrow: jest.fn().mockReturnValue('fake-value')
+          }
         },
         {
           provide: AuthService,
-          useValue: { findOrCreateGoogleUser: jest.fn() },
-        },
-      ],
+          useValue: { findOrCreateGoogleUser: jest.fn() }
+        }
+      ]
     }).compile();
 
     strategy = module.get<GoogleStrategy>(GoogleStrategy);
@@ -54,7 +54,7 @@ describe('GoogleStrategy', () => {
           value: 'alice@example.com',
           verified: 'true' 
         }],
-        ...overrides,
+        ...overrides
       } as Profile);
 
     it('calls findOrCreateGoogleUser with mapped profile data', async () => {
@@ -66,7 +66,7 @@ describe('GoogleStrategy', () => {
       expect(authService.findOrCreateGoogleUser).toHaveBeenCalledWith({
         email: 'alice@example.com',
         fullName: 'Alice Smith',
-        providerUserId: 'google-id-123',
+        providerUserId: 'google-id-123'
       });
     });
 
@@ -86,7 +86,7 @@ describe('GoogleStrategy', () => {
       await strategy.validate('access', 'refresh', profile);
 
       expect(authService.findOrCreateGoogleUser).toHaveBeenCalledWith(
-        expect.objectContaining({ email: undefined }),
+        expect.objectContaining({ email: undefined })
       );
     });
   });

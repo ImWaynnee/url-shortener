@@ -1,3 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  /* Non-interactive display badge — fully rounded, no border */
+  .pill {
+    @apply inline-block rounded-full bg-gray-100 px-2 py-1 text-xs font-mono text-gray-600;
+  }
+
+  /* Icon-only ghost button — squarish, bordered, neutral */
+  .btn-ghost {
+    @apply rounded border border-gray-200 bg-white text-gray-600 transition-colors;
+  }
+
+  /* Icon + text labeled button — squarish, bordered, colors applied per-instance */
+  .btn-labeled {
+    @apply flex items-center gap-1.5 px-1.5 py-1.5 rounded border transition-colors;
+  }
+
+  /* Text-only filter/tab button — squarish, bordered, colors applied per-instance */
+  .btn-filter {
+    @apply px-2.5 py-1 text-xs rounded border transition-colors;
+  }
+}

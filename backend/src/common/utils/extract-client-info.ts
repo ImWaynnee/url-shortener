@@ -1,10 +1,6 @@
+import type { ClientInfo } from '@common/interfaces/client-info.interface';
 import { BadRequestException } from '@nestjs/common';
 import type { Request } from 'express';
-
-export interface ClientInfo {
-  deviceInfo: string;
-  ipAddress: string;
-}
 
 /**
  * Extracts User-Agent and IP address from the request.
@@ -21,6 +17,8 @@ export function extractClientInfo(req: Request): ClientInfo {
     (req.headers['x-real-ip'] as string | undefined) ||
     (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0].trim() ||
     req.ip;
+  
+  const referrer = (req.headers['referer'] as string | undefined) ?? null;
 
   if (!deviceInfo || !ipAddress) {
     throw new BadRequestException('Unable to identify client device or origin');
@@ -28,6 +26,7 @@ export function extractClientInfo(req: Request): ClientInfo {
 
   return {
     deviceInfo,
-    ipAddress 
+    ipAddress,
+    referrer
   };
 }

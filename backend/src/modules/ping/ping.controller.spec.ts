@@ -7,7 +7,7 @@ describe('PingController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [PingController],
+      controllers: [PingController]
     }).compile();
 
     controller = module.get<PingController>(PingController);

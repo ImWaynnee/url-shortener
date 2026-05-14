@@ -15,12 +15,12 @@ import { PassportModule } from '@nestjs/passport';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>('JWT_SECRET'),
-        signOptions: { expiresIn: parseInt(config.getOrThrow<string>('JWT_EXPIRATION'), 10) },
-      }),
-    }),
+        signOptions: { expiresIn: parseInt(config.getOrThrow<string>('JWT_EXPIRATION'), 10) }
+      })
+    })
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, GoogleStrategy, JwtStrategy],
-  exports: [JwtModule, PassportModule, JwtStrategy],
+  exports: [JwtModule, PassportModule, JwtStrategy]
 })
 export class AuthModule {}

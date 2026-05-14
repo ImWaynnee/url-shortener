@@ -5,8 +5,8 @@ export const TOKEN_KEY = 'access_token';
 export const REFRESH_KEY = 'refresh_token';
 
 export const apiClient = axios.create({
-  baseURL: env.apiBaseUrl,
-  headers: { 'Content-Type': 'application/json' },
+  baseURL: env.VITE_API_BASE_URL,
+  headers: { 'Content-Type': 'application/json' }
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -51,8 +51,8 @@ apiClient.interceptors.response.use(
     try {
       const { data } = await axios.post<{ accessToken: string;
         refreshToken: string }>(
-        `${env.apiBaseUrl}/auth/refresh`,
-        { refreshToken },
+        `${env.VITE_API_BASE_URL}/auth/refresh`,
+        { refreshToken }
       );
       storeTokens(data.accessToken, data.refreshToken);
       refreshQueue.forEach((cb) => cb(data.accessToken));
@@ -66,7 +66,7 @@ apiClient.interceptors.response.use(
     } finally {
       isRefreshing = false;
     }
-  },
+  }
 );
 
 export function storeTokens(accessToken: string, refreshToken: string): void {

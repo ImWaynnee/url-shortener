@@ -30,32 +30,32 @@ import { Keyv } from 'keyv';
             new Keyv({
               store: new KeyvCacheableMemory({
                 ttl: config.getOrThrow<number>('CACHE_L1_TTL_MS'),
-                lruSize: 5000,
-              }),
+                lruSize: 5000
+              })
             }),
-            new KeyvRedis(config.getOrThrow<string>('REDIS_URL')),
-          ],
+            new KeyvRedis(config.getOrThrow<string>('REDIS_URL'))
+          ]
         };
-      },
+      }
     }),
     PrismaModule,
     ThrottlerModule.forRoot({
       throttlers: [
         {
           ttl: 60000,
-          limit: 60,
-        },
-      ],
+          limit: 60
+        }
+      ]
     }),
     PingModule,
     UrlModule,
-    AuthModule,
+    AuthModule
   ],
   providers: [
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+      useClass: ThrottlerGuard
+    }
   ]
 })
 export class AppModule {}

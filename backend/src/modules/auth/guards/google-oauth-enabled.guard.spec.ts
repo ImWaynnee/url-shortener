@@ -1,5 +1,5 @@
 import { GoogleOAuthEnabledGuard } from '@modules/auth/guards/google-oauth-enabled.guard';
-import type { ExecutionContext} from '@nestjs/common';
+import type { ExecutionContext } from '@nestjs/common';
 import { NotImplementedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { TestingModule } from '@nestjs/testing';
@@ -17,9 +17,9 @@ describe('GoogleOAuthEnabledGuard', () => {
         GoogleOAuthEnabledGuard,
         {
           provide: ConfigService,
-          useValue: { get: jest.fn() },
-        },
-      ],
+          useValue: { get: jest.fn() }
+        }
+      ]
     }).compile();
 
     guard = module.get<GoogleOAuthEnabledGuard>(GoogleOAuthEnabledGuard);
