@@ -3,7 +3,8 @@ import { fmtIsoToDisplayDatetime } from '@components/dashboard/analytics/utils';
 import { Loader2, MousePointerClick } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-export function DestinationsPanel({ urlId }: { urlId: string }) {
+export function DestinationsPanel({ urlId, refreshKey }: { urlId: string;
+  refreshKey: number }) {
   const [destinations, setDestinations] = useState<UrlDestinationResponse[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -14,7 +15,7 @@ export function DestinationsPanel({ urlId }: { urlId: string }) {
       .then(setDestinations)
       .catch(() => undefined)
       .finally(() => setLoading(false));
-  }, [urlId]);
+  }, [urlId, refreshKey]);
 
   // Active destination is already shown on the card — skip it here
   const pastDestinations = destinations?.slice(1) ?? [];
@@ -57,7 +58,7 @@ export function DestinationsPanel({ urlId }: { urlId: string }) {
               <span className="text-xs font-mono text-gray-600 whitespace-nowrap">
                 {dest.destinationUrl ?? '—'}
               </span>
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-3 shrink-0 ml-auto">
                 <span
                   className="inline-flex items-center gap-1 text-xs text-gray-500"
                   aria-label={`${dest.clickCount} clicks`}

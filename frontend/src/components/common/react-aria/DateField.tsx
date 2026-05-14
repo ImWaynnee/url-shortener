@@ -31,7 +31,7 @@ export function DateField<T extends DateValue>(
 }
 
 const segmentStyles = tv({
-  base: 'inline p-0.5 whitespace-nowrap type-literal:p-0 type-literal:text-gray-300 rounded-sm outline-0 caret-transparent text-gray-700 [-webkit-tap-highlight-color:transparent]',
+  base: 'inline px-0 whitespace-nowrap type-literal:px-0 type-literal:text-gray-300 rounded-sm outline-0 caret-transparent text-gray-700 [-webkit-tap-highlight-color:transparent]',
   variants: {
     isPlaceholder: {
       true: 'text-gray-600'
@@ -49,9 +49,17 @@ export function DateInput(props: Omit<DateInputProps, 'children'>) {
   return (
     <AriaDateInput className={renderProps => fieldGroupStyles({
       ...renderProps,
-      class: 'inline min-w-[150px] px-2 h-8 text-xs leading-8 cursor-text whitespace-nowrap overflow-x-auto [scrollbar-width:none]'
+      class: 'inline min-w-[120px] px-2 h-8 text-xs leading-8 cursor-text whitespace-nowrap overflow-x-auto [scrollbar-width:none] gap-0.5'
     })} {...props}>
-      {(segment) => <DateSegment segment={segment} className={segmentStyles} />}
+      {(segment) => {
+        let text = segment.text;
+        if ((segment.type === 'hour' || segment.type === 'minute') && !segment.isPlaceholder) {
+          text = segment.text.padStart(2, '0');
+        }
+        return <DateSegment segment={segment} className={segmentStyles}>
+          {text}
+        </DateSegment>;
+      }}
     </AriaDateInput>
   );
 }

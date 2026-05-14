@@ -1,4 +1,4 @@
-import { IsBoolean, IsISO8601, IsOptional, IsString, IsUrl, ValidateIf } from 'class-validator';
+import { IsBoolean, IsISO8601, IsOptional, IsString, IsUrl, MaxLength, ValidateIf } from 'class-validator';
 
 export class UpdateUrlRequest {
   @IsOptional()
@@ -8,6 +8,7 @@ export class UpdateUrlRequest {
   @IsOptional()
   @ValidateIf((_, value) => value !== null)
   @IsString()
+  @MaxLength(100, { message: 'Comment must be 100 characters or less' })
   comments?: string | null;
 
   @IsOptional()

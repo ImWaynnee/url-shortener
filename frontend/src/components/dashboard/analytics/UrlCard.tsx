@@ -1,4 +1,5 @@
 import { updateUrlApi, type UrlResponse } from '@api/url';
+import { commentSchema, expirySchema,urlSchema } from '@api/validation';
 import { DateTimePicker } from '@components/common/react-aria/DateTimePicker';
 import { DestinationsPanel } from '@components/dashboard/analytics/DestinationsPanel';
 import { fmtIsoToDisplayDate, fmtIsoToDisplayDatetime } from '@components/dashboard/analytics/utils';
@@ -26,6 +27,7 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
   const [destinationDraft, setDestinationDraft] = useState(url.destinationUrl);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [destinationRefreshKey, setDestinationRefreshKey] = useState(0);
 
   const isExpired = url.expiresAt != null && new Date(url.expiresAt) < new Date();
   const fullUrl = `${env.VITE_REDIRECT_DOMAIN}/${url.shortUrl}`;
@@ -58,14 +60,21 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
     });
   }
 
-  function isValidUrl(value: string): boolean {
-    try { new URL(value); return true; } catch { return false; }
-  }
-
   async function saveComments() {
+    // Collapse multiple spaces/newlines to a single space, trim leading/trailing
+    const normalized = commentsDraft.replace(/\s+/g, ' ').trim();
+    if ((url.comments ?? '').replace(/\s+/g, ' ').trim() === normalized) {
+      setEditMode(null);
+      return;
+    }
+    const validation = commentSchema.safeParse(normalized);
+    if (!validation.success) {
+      showToast(validation.error.message || 'Invalid comment');
+      return;
+    }
     setSaving(true);
     try {
-      const updated = await updateUrlApi(url.id, { comments: commentsDraft.trim() || null });
+      const updated = await updateUrlApi(url.id, { comments: normalized || null });
       onUpdated(updated);
       setEditMode(null);
       showToast('Comment saved');
@@ -77,13 +86,22 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
   }
 
   async function saveDestination() {
-    if (!isValidUrl(destinationDraft)) return;
+    if (destinationDraft.trim() === (url.destinationUrl ?? '').trim()) {
+      setEditMode(null);
+      return;
+    }
+    const validation = urlSchema.safeParse(destinationDraft);
+    if (!validation.success) {
+      showToast(validation.error.message || 'Invalid URL');
+      return;
+    }
     setSaving(true);
     try {
       const updated = await updateUrlApi(url.id, { destinationUrl: destinationDraft });
       onUpdated(updated);
       setEditMode(null);
       showToast('Destination updated');
+      setDestinationRefreshKey((k) => k + 1); // refresh destinations panel
     } catch {
       showToast('Failed to update destination');
     } finally {
@@ -105,10 +123,20 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
   }
 
   async function saveExpiry() {
+    const timeZone = window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const isoExpiry = expiryDraft ? toZoned(expiryDraft, timeZone).toAbsoluteString() : null;
+    const currentIsoExpiry = url.expiresAt ? toZoned(toCalendarDateTime(parseAbsoluteToLocal(url.expiresAt)), timeZone).toAbsoluteString() : null;
+    if (isoExpiry === currentIsoExpiry) {
+      setEditMode(null);
+      return;
+    }
+    const validation = expirySchema.safeParse(isoExpiry);
+    if (!validation.success) {
+      showToast(validation.error.message || 'Invalid expiry date');
+      return;
+    }
     setSaving(true);
     try {
-      const timeZone = window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const isoExpiry = expiryDraft ? toZoned(expiryDraft, timeZone).toAbsoluteString() : null;
       const updated = await updateUrlApi(url.id, { expiresAt: isoExpiry });
       onUpdated(updated);
       setEditMode(null);
@@ -200,8 +228,15 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
               />
               <button
                 onClick={() => void saveDestination()}
-                disabled={saving || !isValidUrl(destinationDraft)}
-                aria-label="Save destination URL"
+                disabled={saving || !urlSchema.safeParse(destinationDraft).success}
+                aria-label={
+                  saving
+                    ? 'Saving destination URL'
+                    : !urlSchema.safeParse(destinationDraft).success
+                      ? 'URL invalid'
+                      : 'Save destination URL'
+                }
+                title={!urlSchema.safeParse(destinationDraft).success ? 'URL invalid' : undefined}
                 className="p-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
               >
                 {saving ? (
@@ -310,7 +345,13 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
                 {url.expiresAt ? `Expires ${fmtIsoToDisplayDatetime(url.expiresAt)}` : 'No expiry'}
               </span>
               <button
-                onClick={() => setEditMode('expiry')}
+                onClick={() => {
+                  setEditMode('expiry');
+                  if (!url.expiresAt) {
+                    // Default to now if no expiry is set
+                    setExpiryDraft(toCalendarDateTime(parseAbsoluteToLocal(new Date().toISOString())));
+                  }
+                }}
                 aria-label="Set expiry date"
                 title="Set expiry"
                 className="btn-ghost flex items-center gap-1 px-1.5 py-0.5 hover:text-blue-600 hover:bg-blue-50"
@@ -445,7 +486,7 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
       {/* Expanded: past destinations */}
       {expanded && (
         <div className="border-t border-gray-100 bg-blue-50/20 rounded-b-xl overflow-x-auto">
-          <DestinationsPanel urlId={url.id} />
+          <DestinationsPanel urlId={url.id} refreshKey={destinationRefreshKey} />
         </div>
       )}
     </div>
