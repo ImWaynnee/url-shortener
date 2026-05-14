@@ -1,4 +1,5 @@
 import { updateUrlApi, type UrlResponse } from '@api/url';
+import { commentSchema, expirySchema,urlSchema } from '@api/validation';
 import { DateTimePicker } from '@components/common/react-aria/DateTimePicker';
 import { DestinationsPanel } from '@components/dashboard/analytics/DestinationsPanel';
 import { fmtIsoToDisplayDate, fmtIsoToDisplayDatetime } from '@components/dashboard/analytics/utils';
@@ -59,15 +60,16 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
     });
   }
 
-  function isValidUrl(value: string): boolean {
-    try { new URL(value); return true; } catch { return false; }
-  }
-
   async function saveComments() {
     // Collapse multiple spaces/newlines to a single space, trim leading/trailing
     const normalized = commentsDraft.replace(/\s+/g, ' ').trim();
     if ((url.comments ?? '').replace(/\s+/g, ' ').trim() === normalized) {
       setEditMode(null);
+      return;
+    }
+    const validation = commentSchema.safeParse(normalized);
+    if (!validation.success) {
+      showToast(validation.error.message || 'Invalid comment');
       return;
     }
     setSaving(true);
@@ -84,9 +86,13 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
   }
 
   async function saveDestination() {
-    if (!isValidUrl(destinationDraft)) return;
     if (destinationDraft.trim() === (url.destinationUrl ?? '').trim()) {
       setEditMode(null);
+      return;
+    }
+    const validation = urlSchema.safeParse(destinationDraft);
+    if (!validation.success) {
+      showToast(validation.error.message || 'Invalid URL');
       return;
     }
     setSaving(true);
@@ -122,6 +128,11 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
     const currentIsoExpiry = url.expiresAt ? toZoned(toCalendarDateTime(parseAbsoluteToLocal(url.expiresAt)), timeZone).toAbsoluteString() : null;
     if (isoExpiry === currentIsoExpiry) {
       setEditMode(null);
+      return;
+    }
+    const validation = expirySchema.safeParse(isoExpiry);
+    if (!validation.success) {
+      showToast(validation.error.message || 'Invalid expiry date');
       return;
     }
     setSaving(true);
@@ -217,8 +228,15 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
               />
               <button
                 onClick={() => void saveDestination()}
-                disabled={saving || !isValidUrl(destinationDraft)}
-                aria-label="Save destination URL"
+                disabled={saving || !urlSchema.safeParse(destinationDraft).success}
+                aria-label={
+                  saving
+                    ? 'Saving destination URL'
+                    : !urlSchema.safeParse(destinationDraft).success
+                      ? 'URL invalid'
+                      : 'Save destination URL'
+                }
+                title={!urlSchema.safeParse(destinationDraft).success ? 'URL invalid' : undefined}
                 className="p-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
               >
                 {saving ? (
