@@ -1,10 +1,12 @@
 import { type AuthUser,loginApi, meApi, registerApi } from '@api/auth';
 import { clearTokens, getAccessToken, storeTokens } from '@api/client';
-import {createContext,
+import {
+  createContext,
   type ReactNode,
   useCallback,
   useEffect,
-  useState,} from 'react';
+  useState
+} from 'react';
 
 export interface AuthContextValue {
   user: AuthUser | null;
@@ -49,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(me);
       return me;
     },
-    [],
+    []
   );
 
   const logout = useCallback(() => {
@@ -64,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(me);
       return me;
     },
-    [],
+    []
   );
 
   return (

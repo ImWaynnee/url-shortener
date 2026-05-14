@@ -1,9 +1,13 @@
 import { useAuth } from '@hooks/useAuth';
-import { ChevronDown, LogOut } from 'lucide-react';
+import { ChevronDown, LogOut, Menu } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+  onMobileMenuToggle: () => void;
+}
+
+export function DashboardHeader({ onMobileMenuToggle }: DashboardHeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -27,9 +31,16 @@ export function DashboardHeader() {
   const displayName = user?.fullName ?? user?.email?.split('@')[0] ?? '';
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shrink-0 shadow-sm">
+    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm">
       <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold text-gray-700">Dashboard</span>
+        <button
+          onClick={onMobileMenuToggle}
+          className="md:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+          aria-label="Open navigation menu"
+        >
+          <Menu size={20} />
+        </button>
+        <span className="text-sm font-semibold text-gray-700">Account Dashboard</span>
       </div>
 
       {/* Account menu */}
@@ -46,13 +57,13 @@ export function DashboardHeader() {
           <span className="hidden sm:block text-sm font-medium text-gray-700 max-w-[160px] truncate">
             {displayName}
           </span>
-          <ChevronDown size={16} className="text-gray-400" />
+          <ChevronDown size={16} className="text-gray-600" />
         </button>
 
         {open && (
-          <div className="absolute right-0 top-full mt-1 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+          <div className="absolute right-0 top-full mt-1 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50">
             {/* Identity block */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
               <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-semibold select-none shrink-0">
                 {initial}
               </div>

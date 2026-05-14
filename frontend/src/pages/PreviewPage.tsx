@@ -35,8 +35,8 @@ export function PreviewPage() {
   // Countdown tick
   useEffect(() => {
     if (countdown === null) return;
-    if (countdown === 0 && info?.originalUrl) {
-      window.location.href = info.originalUrl;
+    if (countdown === 0 && info?.destinationUrl) {
+      window.location.href = info.destinationUrl;
       return;
     }
     const t = setTimeout(() => setCountdown((c) => (c !== null ? c - 1 : null)), 1000);
@@ -54,9 +54,9 @@ export function PreviewPage() {
   if (!info) return null;
 
   const displayUrl =
-    info.originalUrl.length > 60
-      ? `${info.originalUrl.slice(0, 57)}…`
-      : info.originalUrl;
+    info.destinationUrl.length > 60
+      ? `${info.destinationUrl.slice(0, 57)}…`
+      : info.destinationUrl;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -68,19 +68,19 @@ export function PreviewPage() {
         </div>
 
         {/* Short URL */}
-        <p className="text-xs text-gray-600 font-mono bg-gray-100 rounded px-2 py-1 inline-block mb-4">
+        <p className="pill mb-4">
           {code}
         </p>
 
         {/* Destination */}
         <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 mb-6">
-          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Destination</p>
+          <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">Destination</p>
           <p className="text-sm text-gray-800 font-medium break-all">{displayUrl}</p>
         </div>
 
         {/* Auto-redirect notice */}
         {countdown !== null && countdown > 0 && (
-          <p className="text-xs text-center text-gray-400 mb-4">
+          <p className="text-xs text-center text-gray-600 mb-4">
             Redirecting automatically in {countdown}s…
           </p>
         )}
@@ -88,7 +88,7 @@ export function PreviewPage() {
         {/* Actions */}
         <div className="flex flex-col gap-2">
           <a
-            href={info.originalUrl}
+            href={info.destinationUrl}
             className="w-full text-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg px-4 py-2.5 transition-colors"
             rel="noopener noreferrer"
           >

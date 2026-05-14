@@ -20,6 +20,11 @@ import { Cache } from 'cache-manager';
 import type { Request } from 'express';
 import { nanoid } from 'nanoid';
 
+const LATEST_DESTINATION = {
+  take: 1,
+  orderBy: { createdAt: 'desc' as const }
+};
+
 @Injectable()
 export class UrlService {
   constructor(
@@ -43,7 +48,6 @@ export class UrlService {
       const url = await tx.url.create({
         data: {
           shortUrl,
-          originalUrl: dto.url,
           ...(userId ? { createdById: userId } : {})
         }
       });
@@ -51,15 +55,14 @@ export class UrlService {
       await tx.urlDestination.create({
         data: {
           urlId: url.id,
-          destinationUrl: dto.url,
-          isActive: true 
+          destinationUrl: dto.url
         }
       });
 
       await tx.urlStat.create({
         data: {
           urlId: url.id,
-          totalClicks: 0 
+          totalClicks: 0
         }
       });
 
@@ -68,12 +71,12 @@ export class UrlService {
 
     return {
       shortUrl: url.shortUrl,
-      originalUrl: url.originalUrl,
+      destinationUrl: dto.url,
       newUrl: `${this.config.get('REDIRECT_DOMAIN', 'http://s-local.wyzwyz.xyz')}/${url.shortUrl}`
     };
   }
 
-  async getOriginalUrl(shortUrl: string): Promise<UrlCacheEntry> {
+  async getLinkedUrl(shortUrl: string): Promise<UrlCacheEntry> {
     const cacheKey = `redirect:${shortUrl}`;
 
     const cached = await this.cache.get<UrlCacheEntry>(cacheKey);
@@ -88,7 +91,6 @@ export class UrlService {
         where: { shortUrl },
         include: {
           urlDestinations: {
-            where: { isActive: true },
             take: 1,
             orderBy: { createdAt: 'desc' }
           }
@@ -102,7 +104,7 @@ export class UrlService {
       const entry: UrlCacheEntry = {
         id: url.id.toString(),
         shortUrl: url.shortUrl,
-        originalUrl: url.originalUrl,
+        destinationUrl: url.urlDestinations[0]?.destinationUrl ?? '',
         isActive: url.isActive,
         expiresAt: url.expiresAt ? url.expiresAt.toISOString() : null,
         activeDestinationId: url.urlDestinations[0]?.id.toString() ?? null
@@ -114,11 +116,11 @@ export class UrlService {
   }
 
   async getUrlInfo(shortCode: string): Promise<UrlInfoResponse> {
-    const entry = await this.getOriginalUrl(shortCode);
+    const entry = await this.getLinkedUrl(shortCode);
     const now = new Date();
     return {
       shortUrl: entry.shortUrl,
-      originalUrl: entry.originalUrl,
+      destinationUrl: entry.destinationUrl,
       isActive: entry.isActive,
       isExpired: entry.expiresAt ? new Date(entry.expiresAt) < now : false,
       expiresAt: entry.expiresAt
@@ -140,7 +142,7 @@ export class UrlService {
           destinationId,
           ipAddress,
           userAgent,
-          referrer 
+          referrer
         }
       });
       await tx.urlStat.updateMany({
@@ -167,22 +169,26 @@ export class UrlService {
         ? {
           OR: [
             {
-              originalUrl: {
-                contains: search,
-                mode: 'insensitive' as const 
-              } 
+              urlDestinations: {
+                some: {
+                  destinationUrl: {
+                    contains: search,
+                    mode: 'insensitive' as const
+                  }
+                }
+              }
             },
             {
               shortUrl: {
                 contains: search,
-                mode: 'insensitive' as const 
-              } 
+                mode: 'insensitive' as const
+              }
             },
             {
               comments: {
                 contains: search,
-                mode: 'insensitive' as const 
-              } 
+                mode: 'insensitive' as const
+              }
             }
           ]
         }
@@ -192,7 +198,10 @@ export class UrlService {
     const [urls, total] = await this.prisma.$transaction(async (tx) => {
       const items = await tx.url.findMany({
         where,
-        include: { urlStats: true },
+        include: {
+          urlStats: true,
+          urlDestinations: LATEST_DESTINATION
+        },
         orderBy: { createdAt: 'desc' },
         skip,
         take: pageSize
@@ -209,20 +218,42 @@ export class UrlService {
     };
   }
 
-  async updateUrl(id: string, userId: string, dto: UpdateUrlRequest): Promise<UrlResponse> {
+  async updateUrl(id: string, userId: string, updateUrlBody: UpdateUrlRequest): Promise<UrlResponse> {
     const urlId = BigInt(id);
     const existing = await this.prisma.url.findUnique({ where: { id: urlId } });
     if (!existing) throw new NotFoundException('URL not found');
     if (existing.createdById !== userId) throw new ForbiddenException();
 
-    const updated = await this.prisma.url.update({
-      where: { id: urlId },
-      data: {
-        ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
-        ...('comments' in dto ? { comments: dto.comments } : {})
-      },
-      include: { urlStats: true }
-    });
+    const baseData = {
+      ...(updateUrlBody.isActive !== undefined ? { isActive: updateUrlBody.isActive } : {}),
+      ...('comments' in updateUrlBody ? { comments: updateUrlBody.comments } : {}),
+      ...('expiresAt' in updateUrlBody ? { expiresAt: updateUrlBody.expiresAt } : {})
+    };
+
+    const urlInclude = {
+      urlStats: true,
+      urlDestinations: LATEST_DESTINATION
+    };
+
+    const updated = updateUrlBody.destinationUrl !== undefined
+      ? await this.prisma.$transaction(async (tx) => {
+        await tx.urlDestination.create({
+          data: {
+            urlId,
+            destinationUrl: updateUrlBody.destinationUrl!
+          }
+        });
+        return tx.url.update({
+          where: { id: urlId },
+          data: baseData,
+          include: urlInclude
+        });
+      })
+      : await this.prisma.url.update({
+        where: { id: urlId },
+        data: baseData,
+        include: urlInclude
+      });
 
     await this.cache.del(`redirect:${updated.shortUrl}`);
     return this.mapUrlToResponse(updated);
@@ -243,7 +274,6 @@ export class UrlService {
     return destinations.map((d) => ({
       id: d.id.toString(),
       destinationUrl: d.destinationUrl,
-      isActive: d.isActive,
       clickCount: d._count.urlClicks,
       createdAt: d.createdAt.toISOString(),
       updatedAt: d.updatedAt?.toISOString() ?? null
@@ -268,7 +298,7 @@ export class UrlService {
     const destination = await this.prisma.urlDestination.findFirst({
       where: {
         id: destIdBig,
-        urlId: urlIdBig 
+        urlId: urlIdBig
       }
     });
     if (!destination) throw new NotFoundException('Destination not found');
@@ -277,7 +307,7 @@ export class UrlService {
       const items = await tx.urlClick.findMany({
         where: {
           urlId: urlIdBig,
-          destinationId: destIdBig 
+          destinationId: destIdBig
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -286,7 +316,7 @@ export class UrlService {
       const count = await tx.urlClick.count({
         where: {
           urlId: urlIdBig,
-          destinationId: destIdBig 
+          destinationId: destIdBig
         }
       });
       return [items, count] as const;
@@ -309,7 +339,6 @@ export class UrlService {
   private mapUrlToResponse(url: {
     id: bigint;
     shortUrl: string;
-    originalUrl: string;
     comments: string | null;
     isActive: boolean;
     expiresAt: Date | null;
@@ -317,11 +346,12 @@ export class UrlService {
     updatedAt: Date | null;
     urlStats: { totalClicks: number;
       lastClickedAt: Date | null }[];
+    urlDestinations: { destinationUrl: string }[];
   }): UrlResponse {
     return {
       id: url.id.toString(),
       shortUrl: url.shortUrl,
-      originalUrl: url.originalUrl,
+      destinationUrl: url.urlDestinations[0]?.destinationUrl ?? '',
       comments: url.comments,
       isActive: url.isActive,
       expiresAt: url.expiresAt?.toISOString() ?? null,

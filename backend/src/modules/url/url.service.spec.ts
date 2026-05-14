@@ -72,10 +72,7 @@ describe('UrlService', () => {
     let stubUrl: ReturnType<typeof buildUrl>;
 
     beforeEach(() => {
-      stubUrl = buildUrl({
-        shortUrl: 'abc1234',
-        originalUrl: 'https://example.com'
-      });
+      stubUrl = buildUrl({ shortUrl: 'abc1234' });
 
       mockPrismaService.url.findUnique.mockResolvedValue(null);
       mockPrismaService.url.create.mockResolvedValue(stubUrl);
@@ -91,7 +88,7 @@ describe('UrlService', () => {
       });
       expect(result).toEqual({
         shortUrl: 'abc1234',
-        originalUrl: 'https://example.com',
+        destinationUrl: 'https://example.com',
         newUrl: 'http://sh.example.com/abc1234'
       });
     });
@@ -104,13 +101,12 @@ describe('UrlService', () => {
 
       expect(mockPrismaService.url.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          originalUrl: 'https://example.com',
           createdById: 'user-uuid-123'
         })
       });
       expect(result).toEqual({
         shortUrl: 'abc1234',
-        originalUrl: 'https://example.com',
+        destinationUrl: 'https://example.com',
         newUrl: 'http://sh.example.com/abc1234'
       });
     });
@@ -118,8 +114,7 @@ describe('UrlService', () => {
     it('should create a UrlDestination and UrlStat row inside the transaction', async () => {
       stubUrl = buildUrl({
         id: BigInt(1),
-        shortUrl: 'abc1234',
-        originalUrl: 'https://example.com'
+        shortUrl: 'abc1234' 
       });
       mockPrismaService.url.create.mockResolvedValue(stubUrl);
 
@@ -127,8 +122,7 @@ describe('UrlService', () => {
 
       expect(mockPrismaService.urlDestination.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          destinationUrl: 'https://example.com',
-          isActive: true
+          destinationUrl: 'https://example.com'
         })
       });
       expect(mockPrismaService.urlStat.create).toHaveBeenCalledWith({
@@ -148,11 +142,11 @@ describe('UrlService', () => {
     });
   });
 
-  describe('getOriginalUrl', () => {
+  describe('getLinkedUrl', () => {
     const cachedEntry: UrlCacheEntry = {
       id: '1',
       shortUrl: 'abc1234',
-      originalUrl: 'https://example.com',
+      destinationUrl: 'https://example.com',
       isActive: true,
       expiresAt: null,
       activeDestinationId: '1'
@@ -161,7 +155,7 @@ describe('UrlService', () => {
     it('should return cached entry without hitting DB on cache hit', async () => {
       mockCacheManager.get.mockResolvedValue(cachedEntry);
 
-      const result = await service.getOriginalUrl('abc1234');
+      const result = await service.getLinkedUrl('abc1234');
 
       expect(mockCacheManager.get).toHaveBeenCalledWith('redirect:abc1234');
       expect(mockPrismaService.url.findUnique).not.toHaveBeenCalled();
@@ -169,12 +163,14 @@ describe('UrlService', () => {
     });
 
     it('should query DB, build a UrlCacheEntry, and populate cache on cache miss', async () => {
-      const destination = buildUrlDestination({ id: BigInt(1) });
+      const destination = buildUrlDestination({
+        id: BigInt(1),
+        destinationUrl: 'https://example.com' 
+      });
       const stubUrlWithDests = buildUrlWithDestinations(
         {
           id: BigInt(1),
           shortUrl: 'abc1234',
-          originalUrl: 'https://example.com',
           isActive: true,
           expiresAt: null
         },
@@ -184,13 +180,12 @@ describe('UrlService', () => {
       mockCacheManager.get.mockResolvedValue(undefined);
       mockPrismaService.url.findUnique.mockResolvedValue(stubUrlWithDests as never);
 
-      const result = await service.getOriginalUrl('abc1234');
+      const result = await service.getLinkedUrl('abc1234');
 
       expect(mockPrismaService.url.findUnique).toHaveBeenCalledWith({
         where: { shortUrl: 'abc1234' },
         include: {
           urlDestinations: {
-            where: { isActive: true },
             take: 1,
             orderBy: { createdAt: 'desc' }
           }
@@ -204,7 +199,7 @@ describe('UrlService', () => {
       mockCacheManager.get.mockResolvedValue(undefined);
       mockPrismaService.url.findUnique.mockResolvedValue(null);
 
-      await expect(service.getOriginalUrl('notfound')).rejects.toThrow(NotFoundException);
+      await expect(service.getLinkedUrl('notfound')).rejects.toThrow(NotFoundException);
     });
 
     it('should return cache entry populated by a concurrent request inside the coalesced fetcher (rechecked path)', async () => {
@@ -212,7 +207,7 @@ describe('UrlService', () => {
         .mockResolvedValueOnce(undefined) // outer miss
         .mockResolvedValueOnce(cachedEntry); // inner recheck hit
 
-      const result = await service.getOriginalUrl('abc1234');
+      const result = await service.getLinkedUrl('abc1234');
 
       expect(mockCacheManager.get).toHaveBeenCalledTimes(2);
       expect(mockPrismaService.url.findUnique).not.toHaveBeenCalled();
@@ -226,7 +221,7 @@ describe('UrlService', () => {
       const entry: UrlCacheEntry = {
         id: '1',
         shortUrl: 'abc1234',
-        originalUrl: 'https://example.com',
+        destinationUrl: 'https://example.com',
         isActive: true,
         expiresAt: null,
         activeDestinationId: '1'
@@ -237,7 +232,7 @@ describe('UrlService', () => {
 
       expect(result).toEqual({
         shortUrl: 'abc1234',
-        originalUrl: 'https://example.com',
+        destinationUrl: 'https://example.com',
         isActive: true,
         isExpired: false,
         expiresAt: null
@@ -249,7 +244,7 @@ describe('UrlService', () => {
       const entry: UrlCacheEntry = {
         id: '1',
         shortUrl: 'abc1234',
-        originalUrl: 'https://example.com',
+        destinationUrl: 'https://example.com',
         isActive: true,
         expiresAt: pastDate,
         activeDestinationId: '1'
@@ -267,7 +262,7 @@ describe('UrlService', () => {
       const entry: UrlCacheEntry = {
         id: '1',
         shortUrl: 'abc1234',
-        originalUrl: 'https://example.com',
+        destinationUrl: 'https://example.com',
         isActive: true,
         expiresAt: futureDate,
         activeDestinationId: '1'
@@ -285,7 +280,7 @@ describe('UrlService', () => {
       ({
         headers: {
           'user-agent': 'Mozilla/5.0',
-          'x-real-ip': '10.0.0.1' 
+          'x-real-ip': '10.0.0.1'
         },
         ip: '10.0.0.1'
       } as never);
@@ -294,7 +289,7 @@ describe('UrlService', () => {
       const entry: UrlCacheEntry = {
         id: '1',
         shortUrl: 'abc1234',
-        originalUrl: 'https://example.com',
+        destinationUrl: 'https://example.com',
         isActive: true,
         expiresAt: null,
         activeDestinationId: null
@@ -310,7 +305,7 @@ describe('UrlService', () => {
       const entry: UrlCacheEntry = {
         id: '10',
         shortUrl: 'abc1234',
-        originalUrl: 'https://example.com',
+        destinationUrl: 'https://example.com',
         isActive: true,
         expiresAt: null,
         activeDestinationId: '20'
@@ -339,12 +334,13 @@ describe('UrlService', () => {
       ...buildUrl({
         id,
         createdById: userId,
-        ...overrides 
+        ...overrides
       }),
       urlStats: [{
         totalClicks: 0,
         lastClickedAt: null 
-      }]
+      }],
+      urlDestinations: [{ destinationUrl: 'https://example.com' }]
     });
 
     beforeEach(() => {
@@ -353,16 +349,13 @@ describe('UrlService', () => {
     });
 
     it('should return paginated results', async () => {
-      const stub = buildStubWithStats(BigInt(1), {
-        shortUrl: 'abc1234',
-        originalUrl: 'https://example.com' 
-      });
+      const stub = buildStubWithStats(BigInt(1), { shortUrl: 'abc1234' });
       mockPrismaService.url.findMany.mockResolvedValue([stub] as never);
       mockPrismaService.url.count.mockResolvedValue(1);
 
       const result = await service.listUserUrls(userId, {
         page: 1,
-        pageSize: 20 
+        pageSize: 20
       });
 
       expect(result.total).toBe(1);
@@ -373,7 +366,7 @@ describe('UrlService', () => {
         expect.objectContaining({
           id: '1',
           shortUrl: 'abc1234',
-          totalClicks: 0 
+          totalClicks: 0
         })
       );
     });
@@ -388,7 +381,7 @@ describe('UrlService', () => {
 
     it('should not include isActive in where when filter is not provided', async () => {
       await service.listUserUrls(userId, {});
-       
+
       const where = mockPrismaService.url.findMany.mock.calls[0]![0]!.where;
       expect(where).not.toHaveProperty('isActive');
     });
@@ -405,7 +398,7 @@ describe('UrlService', () => {
 
     it('should pass OR expiresAt filter when isExpired is false', async () => {
       await service.listUserUrls(userId, { isExpired: false });
-       
+
       const where = mockPrismaService.url.findMany.mock.calls[0]![0]!.where;
       expect(where!.OR).toEqual([
         { expiresAt: null },
@@ -413,29 +406,33 @@ describe('UrlService', () => {
       ]);
     });
 
-    it('should pass search OR filter across originalUrl, shortUrl, and comments', async () => {
+    it('should pass search OR filter across destinationUrl, shortUrl, and comments', async () => {
       await service.listUserUrls(userId, { search: 'hello' });
-       
+
       const where = mockPrismaService.url.findMany.mock.calls[0]![0]!.where;
       expect(where!.OR).toEqual(
         expect.arrayContaining([
           {
-            originalUrl: {
-              contains: 'hello',
-              mode: 'insensitive' 
-            } 
+            urlDestinations: {
+              some: {
+                destinationUrl: {
+                  contains: 'hello',
+                  mode: 'insensitive'
+                }
+              }
+            }
           },
           {
             shortUrl: {
               contains: 'hello',
-              mode: 'insensitive' 
-            } 
+              mode: 'insensitive'
+            }
           },
           {
             comments: {
               contains: 'hello',
-              mode: 'insensitive' 
-            } 
+              mode: 'insensitive'
+            }
           }
         ])
       );
@@ -450,12 +447,13 @@ describe('UrlService', () => {
         id: BigInt(1),
         shortUrl: 'abc1234',
         createdById: userId,
-        ...overrides 
+        ...overrides
       }),
       urlStats: [{
         totalClicks: 0,
         lastClickedAt: null 
-      }]
+      }],
+      urlDestinations: [{ destinationUrl: 'https://example.com' }]
     });
 
     it('should update url, bust cache, and return UrlResponse', async () => {
@@ -463,7 +461,7 @@ describe('UrlService', () => {
         buildUrl({
           id: BigInt(1),
           shortUrl: 'abc1234',
-          createdById: userId 
+          createdById: userId
         })
       );
       mockPrismaService.url.update.mockResolvedValue(buildWithStats({ isActive: false }) as never);
@@ -476,7 +474,7 @@ describe('UrlService', () => {
       expect(mockCacheManager.del).toHaveBeenCalledWith('redirect:abc1234');
       expect(result).toEqual(expect.objectContaining({
         id: '1',
-        isActive: false 
+        isActive: false
       }));
     });
 
@@ -490,7 +488,7 @@ describe('UrlService', () => {
       mockPrismaService.url.findUnique.mockResolvedValue(
         buildUrl({
           id: BigInt(1),
-          createdById: 'other-user' 
+          createdById: 'other-user'
         })
       );
 
@@ -505,14 +503,14 @@ describe('UrlService', () => {
       mockPrismaService.url.findUnique.mockResolvedValue(
         buildUrl({
           id: BigInt(1),
-          createdById: userId 
+          createdById: userId
         })
       );
       mockPrismaService.urlDestination.findMany.mockResolvedValue([
         {
           ...buildUrlDestination({
             id: BigInt(5),
-            urlId: BigInt(1) 
+            urlId: BigInt(1)
           }),
           _count: { urlClicks: 3 }
         }
@@ -524,8 +522,7 @@ describe('UrlService', () => {
       expect(result[0]).toEqual(
         expect.objectContaining({
           id: '5',
-          isActive: true,
-          clickCount: 3 
+          clickCount: 3
         })
       );
     });
@@ -540,7 +537,7 @@ describe('UrlService', () => {
       mockPrismaService.url.findUnique.mockResolvedValue(
         buildUrl({
           id: BigInt(1),
-          createdById: 'other' 
+          createdById: 'other'
         })
       );
 
@@ -552,11 +549,11 @@ describe('UrlService', () => {
     const userId = 'owner-uuid';
     const stubUrl = buildUrl({
       id: BigInt(1),
-      createdById: userId 
+      createdById: userId
     });
     const stubDest = buildUrlDestination({
       id: BigInt(2),
-      urlId: BigInt(1) 
+      urlId: BigInt(1)
     });
     const stubClick = {
       id: BigInt(100),
@@ -576,7 +573,7 @@ describe('UrlService', () => {
 
       const result = await service.listDestinationClicks('1', '2', userId, {
         page: 1,
-        pageSize: 20 
+        pageSize: 20
       });
 
       expect(result.total).toBe(1);
@@ -601,7 +598,7 @@ describe('UrlService', () => {
       mockPrismaService.url.findUnique.mockResolvedValue(
         buildUrl({
           id: BigInt(1),
-          createdById: 'other' 
+          createdById: 'other'
         })
       );
 

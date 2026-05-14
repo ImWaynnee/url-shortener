@@ -13,7 +13,7 @@ const makeReq = (userId?: string) =>
   ({
     user: userId ? {
       userId,
-      email: 'test@example.com' 
+      email: 'test@example.com'
     } : undefined,
     headers: {},
     ip: '127.0.0.1'
@@ -22,7 +22,7 @@ const makeReq = (userId?: string) =>
 const makeCacheEntry = (overrides: Partial<UrlCacheEntry> = {}): UrlCacheEntry => ({
   id: '1',
   shortUrl: 'abc1234',
-  originalUrl: 'https://example.com',
+  destinationUrl: 'https://example.com',
   isActive: true,
   expiresAt: null,
   activeDestinationId: '1',
@@ -35,7 +35,7 @@ describe('UrlController', () => {
 
   const mockUrlService = {
     createShortUrl: jest.fn(),
-    getOriginalUrl: jest.fn(),
+    getLinkedUrl: jest.fn(),
     getUrlInfo: jest.fn(),
     recordClick: jest.fn().mockResolvedValue(undefined),
     listUserUrls: jest.fn(),
@@ -59,11 +59,11 @@ describe('UrlController', () => {
       providers: [
         {
           provide: UrlService,
-          useValue: mockUrlService 
+          useValue: mockUrlService
         },
         {
           provide: ConfigService,
-          useValue: mockConfigService 
+          useValue: mockConfigService
         }
       ]
     }).compile();
@@ -75,7 +75,7 @@ describe('UrlController', () => {
   describe('POST /urls/shorten', () => {
     const serviceResult = {
       shortUrl: 'abc1234',
-      originalUrl: 'https://example.com',
+      destinationUrl: 'https://example.com',
       newUrl: 'http://s-local.wyzwyz.xyz/abc1234'
     };
 
@@ -111,21 +111,21 @@ describe('UrlController', () => {
     const createMockResponse = () =>
       ({ redirect: jest.fn().mockReturnThis() } as unknown as Response);
 
-    it('should redirect to the original URL with 302', async () => {
+    it('should redirect to the destination URL with 302', async () => {
       const res = createMockResponse();
       const entry = makeCacheEntry();
-      mockUrlService.getOriginalUrl.mockResolvedValue(entry);
+      mockUrlService.getLinkedUrl.mockResolvedValue(entry);
 
       await controller.redirect('abc1234', makeReq(), res);
 
-      expect(service.getOriginalUrl).toHaveBeenCalledWith('abc1234');
+      expect(service.getLinkedUrl).toHaveBeenCalledWith('abc1234');
       expect(res.redirect).toHaveBeenCalledWith(302, 'https://example.com');
     });
 
     it('should fire-and-forget recordClick after redirect', async () => {
       const res = createMockResponse();
       const entry = makeCacheEntry();
-      mockUrlService.getOriginalUrl.mockResolvedValue(entry);
+      mockUrlService.getLinkedUrl.mockResolvedValue(entry);
 
       await controller.redirect('abc1234', makeReq(), res);
 
@@ -134,7 +134,7 @@ describe('UrlController', () => {
 
     it('should redirect to frontend with link_disabled error when URL is disabled', async () => {
       const res = createMockResponse();
-      mockUrlService.getOriginalUrl.mockResolvedValue(makeCacheEntry({ isActive: false }));
+      mockUrlService.getLinkedUrl.mockResolvedValue(makeCacheEntry({ isActive: false }));
 
       await controller.redirect('abc1234', makeReq(), res);
 
@@ -145,7 +145,7 @@ describe('UrlController', () => {
     it('should redirect to frontend with link_expired error when URL has expired', async () => {
       const res = createMockResponse();
       const pastDate = new Date(Date.now() - 60_000).toISOString();
-      mockUrlService.getOriginalUrl.mockResolvedValue(
+      mockUrlService.getLinkedUrl.mockResolvedValue(
         makeCacheEntry({ expiresAt: pastDate })
       );
 
@@ -158,7 +158,7 @@ describe('UrlController', () => {
     it('should not treat a future expiresAt as expired', async () => {
       const res = createMockResponse();
       const futureDate = new Date(Date.now() + 60_000).toISOString();
-      mockUrlService.getOriginalUrl.mockResolvedValue(
+      mockUrlService.getLinkedUrl.mockResolvedValue(
         makeCacheEntry({ expiresAt: futureDate })
       );
 
@@ -169,7 +169,7 @@ describe('UrlController', () => {
 
     it('should redirect to frontend with link_not_found error when short code does not exist', async () => {
       const res = createMockResponse();
-      mockUrlService.getOriginalUrl.mockRejectedValue(
+      mockUrlService.getLinkedUrl.mockRejectedValue(
         new NotFoundException('Short code "notfound" not found')
       );
 
@@ -180,18 +180,18 @@ describe('UrlController', () => {
 
     it('should redirect to preview page when shortUrl ends with +', async () => {
       const res = createMockResponse();
-      mockUrlService.getOriginalUrl.mockResolvedValue(makeCacheEntry());
+      mockUrlService.getLinkedUrl.mockResolvedValue(makeCacheEntry());
 
       await controller.redirect('abc1234+', makeReq(), res);
 
-      expect(service.getOriginalUrl).toHaveBeenCalledWith('abc1234');
+      expect(service.getLinkedUrl).toHaveBeenCalledWith('abc1234');
       expect(res.redirect).toHaveBeenCalledWith(302, `${MOCK_FRONTEND_URL}/preview/abc1234`);
       expect(service.recordClick).not.toHaveBeenCalled();
     });
 
     it('should redirect to missing-link when preview target does not exist', async () => {
       const res = createMockResponse();
-      mockUrlService.getOriginalUrl.mockRejectedValue(
+      mockUrlService.getLinkedUrl.mockRejectedValue(
         new NotFoundException('Short code "notfound" not found')
       );
 
@@ -207,13 +207,13 @@ describe('UrlController', () => {
         items: [],
         total: 0,
         page: 1,
-        pageSize: 20 
+        pageSize: 20
       };
       mockUrlService.listUserUrls.mockResolvedValue(expected);
 
       const query = {
         page: 1,
-        pageSize: 20 
+        pageSize: 20
       };
       const result = await controller.listUrls(query as never, makeReq('user-uuid'));
 
@@ -227,7 +227,7 @@ describe('UrlController', () => {
       const expected = {
         id: '1',
         shortUrl: 'abc1234',
-        isActive: false 
+        isActive: false
       };
       mockUrlService.updateUrl.mockResolvedValue(expected);
 
@@ -242,7 +242,7 @@ describe('UrlController', () => {
     it('should delegate to getUrlInfo with the short code', async () => {
       const expected = {
         shortUrl: 'abc1234',
-        originalUrl: 'https://example.com',
+        destinationUrl: 'https://example.com',
         isActive: true,
         isExpired: false,
         expiresAt: null
@@ -264,7 +264,7 @@ describe('UrlController', () => {
         isActive: true,
         clickCount: 0,
         createdAt: '2026-01-01T00:00:00.000Z',
-        updatedAt: null 
+        updatedAt: null
       }];
       mockUrlService.listUrlDestinations.mockResolvedValue(expected);
 
@@ -281,13 +281,13 @@ describe('UrlController', () => {
         items: [],
         total: 0,
         page: 1,
-        pageSize: 20 
+        pageSize: 20
       };
       mockUrlService.listDestinationClicks.mockResolvedValue(expected);
 
       const query = {
         page: 1,
-        pageSize: 20 
+        pageSize: 20
       };
       const result = await controller.listClicks('1', '2', query as never, makeReq('user-uuid'));
 

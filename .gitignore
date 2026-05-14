@@ -44,3 +44,6 @@ coverage/
 
 # Prisma
 */src/generated/prisma/
+
+# Claude
+.claude/settings.local.json

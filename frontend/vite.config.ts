@@ -19,4 +19,17 @@ export default defineConfig({
     port: Number(process.env.VITE_PORT) || 7777,
     strictPort: true,
   },
+  build: {
+    sourcemap: false,
+    minify: 'esbuild',
+    target: 'es2020',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
 });

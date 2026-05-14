@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { createSequence } from '@factories/factory.utils';
 import { faker } from '@faker-js/faker/locale/en';
 import type { Prisma } from '@src/generated/prisma/client';
@@ -5,7 +7,7 @@ import type { UrlDestinationModel, UrlModel } from '@src/generated/prisma/models
 import type { PrismaService } from '@src/prisma.service';
 
 /** Url row with an eagerly-loaded urlDestinations relation (mirrors the
- *  `include: { urlDestinations: ... }` query in getOriginalUrl). */
+ *  `include: { urlDestinations: ... }` query in getLinkedUrl). */
 export type UrlWithDestinations = UrlModel & { urlDestinations: UrlDestinationModel[] };
 
 export const nextId = createSequence();
@@ -15,7 +17,6 @@ export const buildUrl = (overrides: Partial<UrlModel> = {}): UrlModel =>{
   return {
     id: nextId(),
     shortUrl: faker.string.alphanumeric(7),
-    originalUrl: faker.internet.url(),
     createdById: faker.string.uuid(),
     comments: null,
     isActive: true,
@@ -34,7 +35,6 @@ export const createUrl = async (
   return prisma.url.create({
     data: {
       shortUrl: faker.string.alphanumeric(7),
-      originalUrl: faker.internet.url(),
       ...overrides
     }
   });

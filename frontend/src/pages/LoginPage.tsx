@@ -59,7 +59,7 @@ export function LoginPage() {
         {/* Divider */}
         <div className="flex items-center gap-3 my-6">
           <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">or</span>
+          <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">or</span>
           <div className="flex-1 h-px bg-gray-200" />
         </div>
 
@@ -77,7 +77,7 @@ export function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
           </div>
 
@@ -94,12 +94,12 @@ export function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 hover:text-gray-600"
                 tabIndex={-1}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
@@ -133,7 +133,7 @@ export function LoginPage() {
         <div className="mt-4 text-center">
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-600 transition-colors"
           >
             <ArrowLeft size={14} />
             Back to home

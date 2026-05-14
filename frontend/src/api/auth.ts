@@ -26,7 +26,7 @@ export async function loginApi(email: string, password: string): Promise<AuthTok
   const passwordHash = await hashPassword(password);
   const { data } = await apiClient.post<AuthTokenResponse>('/auth/login', {
     email,
-    password: passwordHash,
+    password: passwordHash
   });
   return data;
 }
@@ -34,13 +34,13 @@ export async function loginApi(email: string, password: string): Promise<AuthTok
 export async function registerApi(
   email: string,
   password: string,
-  fullName?: string,
+  fullName?: string
 ): Promise<AuthTokenResponse> {
   const passwordHash = await hashPassword(password);
   const { data } = await apiClient.post<AuthTokenResponse>('/auth/register', {
     email,
     password: passwordHash,
-    ...(fullName ? { fullName } : {}),
+    ...(fullName ? { fullName } : {})
   });
   return data;
 }
@@ -51,5 +51,5 @@ export async function meApi(): Promise<AuthUser> {
 }
 
 export function googleOAuthUrl(): string {
-  return `${env.apiBaseUrl}/auth/google`;
+  return `${env.VITE_API_BASE_URL}/auth/google`;
 }

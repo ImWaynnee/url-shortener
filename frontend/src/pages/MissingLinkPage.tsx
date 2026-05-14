@@ -5,13 +5,13 @@ const REASONS = {
   disabled: {
     title: 'Link Disabled',
     description: 'This link has been disabled by its owner.',
-    icon: <Ban className="w-12 h-12 text-red-400" />,
+    icon: <Ban className="w-12 h-12 text-red-400" />
   },
   expired: {
     title: 'Link Expired',
     description: 'This link is no longer active.',
-    icon: <Clock className="w-12 h-12 text-orange-400" />,
-  },
+    icon: <Clock className="w-12 h-12 text-orange-400" />
+  }
 } as const;
 
 export function MissingLinkPage() {
@@ -24,7 +24,7 @@ export function MissingLinkPage() {
     : {
       title: 'Link Not Found',
       description: "Unfortunately, this link leads nowhere!",
-      icon: <Unlink className="w-12 h-12 text-gray-400" />,
+      icon: <Unlink className="w-12 h-12 text-gray-600" />
     };
 
   return (
@@ -34,7 +34,7 @@ export function MissingLinkPage() {
         <h1 className="text-xl font-semibold text-gray-900 mb-2">{title}</h1>
         <p className="text-sm text-gray-500 mb-2">{description}</p>
         {code && (
-          <p className="text-xs text-gray-600 font-mono bg-gray-100 rounded px-2 py-1 inline-block mb-6">
+          <p className="pill mb-6">
             {code}
           </p>
         )}

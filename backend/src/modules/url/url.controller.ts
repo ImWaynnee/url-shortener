@@ -102,7 +102,7 @@ export class UrlController {
 
     let entry;
     try {
-      entry = await this.urlService.getOriginalUrl(code);
+      entry = await this.urlService.getLinkedUrl(code);
     } catch (e) {
       if (e instanceof NotFoundException) {
         return res.redirect(302, `${frontendUrl}/missing-link?code=${code}`);
@@ -122,7 +122,7 @@ export class UrlController {
       return res.redirect(302, `${frontendUrl}/preview/${code}`);
     }
 
-    res.redirect(302, entry.originalUrl);
+    res.redirect(302, entry.destinationUrl);
     void this.urlService.recordClick(entry, req).catch(() => undefined);
   }
 }

@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 /**
  * Returns a counter function that increments on each call.
  * Use one sequence per factory to get stable, readable IDs in tests.

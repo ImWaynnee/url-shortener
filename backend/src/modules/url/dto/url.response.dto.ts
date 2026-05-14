@@ -1,13 +1,13 @@
 export interface CreateUrlResponse {
   shortUrl: string;
-  originalUrl: string;
+  destinationUrl: string;
   newUrl: string;
 }
 
 export interface UrlResponse {
   id: string;
   shortUrl: string;
-  originalUrl: string;
+  destinationUrl: string;
   comments: string | null;
   isActive: boolean;
   expiresAt: string | null;
@@ -19,7 +19,7 @@ export interface UrlResponse {
 
 export interface UrlInfoResponse {
   shortUrl: string;
-  originalUrl: string;
+  destinationUrl: string;
   isActive: boolean;
   isExpired: boolean;
   expiresAt: string | null;
@@ -28,7 +28,6 @@ export interface UrlInfoResponse {
 export interface UrlDestinationResponse {
   id: string;
   destinationUrl: string | null;
-  isActive: boolean;
   clickCount: number;
   createdAt: string;
   updatedAt: string | null;
@@ -40,11 +39,4 @@ export interface UrlClickResponse {
   userAgent: string | null;
   referrer: string | null;
   createdAt: string;
-}
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
 }

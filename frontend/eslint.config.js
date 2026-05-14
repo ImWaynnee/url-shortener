@@ -38,6 +38,9 @@ module.exports = [
       // Semicolons
       "semi": ["error", "always"],
 
+      // Commas
+      "@/comma-dangle": ["error", "never"],
+
       // Unused imports
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [
@@ -51,10 +54,22 @@ module.exports = [
 
       // Object formatting
       "@stylistic/object-curly-newline": ["error", {
-        "ObjectExpression": { "multiline": true, "consistent": true },
-        "ObjectPattern": { "multiline": true, "consistent": true },
-        "ImportDeclaration": "never",
-        "ExportDeclaration": { "multiline": true, "minProperties": 3 },
+        "ObjectExpression": {
+          "multiline": true,
+          "consistent": true 
+        },
+        "ObjectPattern": {
+          "multiline": true,
+          "consistent": true 
+        },
+        "ImportDeclaration":  {
+          "multiline": true,
+          "consistent": true 
+        },
+        "ExportDeclaration":  {
+          "multiline": true,
+          "consistent": true 
+        },
       }],
       "@stylistic/object-property-newline": ["error", { allowAllPropertiesOnSameLine: false }],
 
@@ -63,6 +78,7 @@ module.exports = [
 
       // Whitespace
       "no-irregular-whitespace": "error",
+      "object-curly-spacing": ["error", "always"],
       "@stylistic/no-multi-spaces": "error",
       "@stylistic/no-multiple-empty-lines": ["error", { max: 1, maxBOF: 0, maxEOF: 1 }],
 

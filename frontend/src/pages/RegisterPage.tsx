@@ -65,7 +65,7 @@ export function RegisterPage() {
         {/* Divider */}
         <div className="flex items-center gap-3 my-6">
           <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">or</span>
+          <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">or</span>
           <div className="flex-1 h-px bg-gray-200" />
         </div>
 
@@ -73,7 +73,7 @@ export function RegisterPage() {
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
             <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name or Alias <span className="text-gray-400 font-normal">(optional)</span>
+              Full Name or Alias <span className="text-gray-600 font-normal">(optional)</span>
             </label>
             <input
               id="fullName"
@@ -82,7 +82,7 @@ export function RegisterPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Jane Smith"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
           </div>
 
@@ -98,14 +98,14 @@ export function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password{' '}
-              <span className="text-gray-400 font-normal">(min 8 characters)</span>
+              <span className="text-gray-600 font-normal">(min 8 characters)</span>
             </label>
             <div className="relative">
               <input
@@ -116,12 +116,12 @@ export function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 hover:text-gray-600"
                 tabIndex={-1}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >

@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { createSequence } from '@factories/factory.utils';
 import { faker } from '@faker-js/faker/locale/en';
 import type { Prisma } from '@src/generated/prisma/client';
@@ -16,7 +18,6 @@ export function buildUrlDestination(overrides: Partial<UrlDestinationModel> = {}
     id: nextId(),
     urlId: nextUrlId(),
     destinationUrl: faker.internet.url(),
-    isActive: true,
     createdAt: faker.date.past(),
     updatedAt: null,
     ...overrides
@@ -35,7 +36,6 @@ export async function createUrlDestination(
   return prisma.urlDestination.create({
     data: {
       destinationUrl: faker.internet.url(),
-      isActive: true,
       ...overrides,
       url: { connect: { id: urlId } }
     }

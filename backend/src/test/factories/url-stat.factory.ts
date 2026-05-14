@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { createSequence } from '@factories/factory.utils';
 import { faker } from '@faker-js/faker';
 import type { Prisma } from '@src/generated/prisma/client';
