@@ -64,15 +64,8 @@ export function AnalyticsDashPanel() {
     fetchUrls();
   }, [fetchUrls]);
 
-  function handleUrlUpdated(updated: UrlResponse) {
-    setData((prev) =>
-      prev
-        ? {
-          ...prev,
-          items: prev.items.map((item) => (item.id === updated.id ? updated : item)) 
-        }
-        : prev
-    );
+  function handleUrlUpdated(_updated: UrlResponse) {
+    fetchUrls();
   }
 
   function applySearch() {
@@ -153,7 +146,7 @@ export function AnalyticsDashPanel() {
             />
             <input
               type="search"
-              placeholder="Search by URL or comment…"
+              placeholder="Search by code, URL or comment…"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && applySearch()}
