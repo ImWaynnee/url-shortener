@@ -26,7 +26,7 @@ export function DateTimePicker<T extends DateValue>(
     <AriaDatePicker {...props} className={composeTailwindRenderProps(props.className, 'group flex flex-col gap-1')}>
       {label && <Label>{label}</Label>}
       <FieldGroup className="w-auto cursor-text disabled:cursor-default">
-        <DateInput className="flex-1 min-w-[170px] px-2 text-xs" />
+        <DateInput className="flex-1 min-w-[150px] px-2 text-xs" />
         <FieldButton className="w-6 mr-1 outline-offset-0">
           <CalendarIcon aria-hidden className="w-3.5 h-3.5" />
         </FieldButton>
