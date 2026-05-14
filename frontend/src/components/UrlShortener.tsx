@@ -115,7 +115,7 @@ export default function UrlShortener() {
         <div className="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <p className="text-xs text-gray-500 mb-1">Your shortened URL</p>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-800 font-mono bg-gray-100 rounded px-2 py-1 inline-block truncate flex-1">
+            <span className="text-xs text-gray-800 font-mono bg-gray-200 rounded-lg px-2 py-1 inline-block truncate flex-1">
               {result.newUrl.replace(/^https?:\/\//, '')}
             </span>
           </div>

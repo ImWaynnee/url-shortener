@@ -64,9 +64,15 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
   }
 
   async function saveComments() {
+    // Collapse multiple spaces/newlines to a single space, trim leading/trailing
+    const normalized = commentsDraft.replace(/\s+/g, ' ').trim();
+    if ((url.comments ?? '').replace(/\s+/g, ' ').trim() === normalized) {
+      setEditMode(null);
+      return;
+    }
     setSaving(true);
     try {
-      const updated = await updateUrlApi(url.id, { comments: commentsDraft.trim() || null });
+      const updated = await updateUrlApi(url.id, { comments: normalized || null });
       onUpdated(updated);
       setEditMode(null);
       showToast('Comment saved');
@@ -79,6 +85,10 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
 
   async function saveDestination() {
     if (!isValidUrl(destinationDraft)) return;
+    if (destinationDraft.trim() === (url.destinationUrl ?? '').trim()) {
+      setEditMode(null);
+      return;
+    }
     setSaving(true);
     try {
       const updated = await updateUrlApi(url.id, { destinationUrl: destinationDraft });
@@ -107,10 +117,15 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
   }
 
   async function saveExpiry() {
+    const timeZone = window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const isoExpiry = expiryDraft ? toZoned(expiryDraft, timeZone).toAbsoluteString() : null;
+    const currentIsoExpiry = url.expiresAt ? toZoned(toCalendarDateTime(parseAbsoluteToLocal(url.expiresAt)), timeZone).toAbsoluteString() : null;
+    if (isoExpiry === currentIsoExpiry) {
+      setEditMode(null);
+      return;
+    }
     setSaving(true);
     try {
-      const timeZone = window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const isoExpiry = expiryDraft ? toZoned(expiryDraft, timeZone).toAbsoluteString() : null;
       const updated = await updateUrlApi(url.id, { expiresAt: isoExpiry });
       onUpdated(updated);
       setEditMode(null);
@@ -312,7 +327,13 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
                 {url.expiresAt ? `Expires ${fmtIsoToDisplayDatetime(url.expiresAt)}` : 'No expiry'}
               </span>
               <button
-                onClick={() => setEditMode('expiry')}
+                onClick={() => {
+                  setEditMode('expiry');
+                  if (!url.expiresAt) {
+                    // Default to now if no expiry is set
+                    setExpiryDraft(toCalendarDateTime(parseAbsoluteToLocal(new Date().toISOString())));
+                  }
+                }}
                 aria-label="Set expiry date"
                 title="Set expiry"
                 className="btn-ghost flex items-center gap-1 px-1.5 py-0.5 hover:text-blue-600 hover:bg-blue-50"
