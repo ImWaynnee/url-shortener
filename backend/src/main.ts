@@ -22,6 +22,7 @@ async function bootstrap() {
     app.use(
       session({
         // NOTE :: Probably should configure instance-independent redis store if we enable horizontal scaling
+        proxy: true, // trust X-Forwarded-Proto: https from nginx; required for secure cookies behind a reverse proxy
         secret: sessionSecret,
         resave: false,
         saveUninitialized: false,
