@@ -6,7 +6,9 @@ import { HomePage } from '@pages/HomePage';
 import { LoginPage } from '@pages/LoginPage';
 import { MissingLinkPage } from '@pages/MissingLinkPage';
 import { PreviewPage } from '@pages/PreviewPage';
+import PrivacyPolicyPage from '@pages/PrivacyPolicyPage';
 import { RegisterPage } from '@pages/RegisterPage';
+import TermsOfServicePage from '@pages/TermsOfServicePage';
 import { Navigate, Route, Routes } from 'react-router';
 
 export default function App() {
@@ -20,6 +22,8 @@ export default function App() {
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/missing-link" element={<MissingLinkPage />} />
         <Route path="/preview/:code" element={<PreviewPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/dashboard/home" element={<DashboardPage />} />
