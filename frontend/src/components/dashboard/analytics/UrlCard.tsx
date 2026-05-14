@@ -26,6 +26,7 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
   const [destinationDraft, setDestinationDraft] = useState(url.destinationUrl);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [destinationRefreshKey, setDestinationRefreshKey] = useState(0);
 
   const isExpired = url.expiresAt != null && new Date(url.expiresAt) < new Date();
   const fullUrl = `${env.VITE_REDIRECT_DOMAIN}/${url.shortUrl}`;
@@ -84,6 +85,7 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
       onUpdated(updated);
       setEditMode(null);
       showToast('Destination updated');
+      setDestinationRefreshKey((k) => k + 1); // refresh destinations panel
     } catch {
       showToast('Failed to update destination');
     } finally {
@@ -445,7 +447,7 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
       {/* Expanded: past destinations */}
       {expanded && (
         <div className="border-t border-gray-100 bg-blue-50/20 rounded-b-xl overflow-x-auto">
-          <DestinationsPanel urlId={url.id} />
+          <DestinationsPanel urlId={url.id} refreshKey={destinationRefreshKey} />
         </div>
       )}
     </div>

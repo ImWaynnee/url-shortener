@@ -268,7 +268,7 @@ export class UrlService {
     const destinations = await this.prisma.urlDestination.findMany({
       where: { urlId },
       include: { _count: { select: { urlClicks: true } } },
-      orderBy: { createdAt: 'asc' }
+      orderBy: { createdAt: 'desc' }
     });
 
     return destinations.map((d) => ({
