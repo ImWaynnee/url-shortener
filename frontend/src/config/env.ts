@@ -1,9 +1,26 @@
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+import { z } from 'zod';
 
-if (!apiBaseUrl) {
-  throw new Error('Missing required env var: VITE_API_BASE_URL');
+const envSchema = z.object({
+  VITE_API_BASE_URL: z
+    .url()
+    .default('http://sh-api-local.wyzwyz.xyz'),
+
+  VITE_REDIRECT_DOMAIN: z
+    .url()
+    .default('http://s-local.wyzwyz.xyz'),
+    
+  VITE_APP_MODE: z.enum(['development', 'production', 'test']).default('development')
+});
+
+const parsed = envSchema.safeParse(import.meta.env);
+
+if (!parsed.success) {
+  console.error(
+    "Invalid environment variables:",
+    parsed.error
+  );
+  throw new Error("Invalid environment variables");
 }
 
-export const env = {
-  apiBaseUrl,
-} as const;
+// 4. Export the validated data
+export const env = parsed.data;

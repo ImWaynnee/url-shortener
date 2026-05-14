@@ -7,6 +7,8 @@ Monorepo with NestJS backend, React+Vite+Tailwind frontend, PostgreSQL via Prism
 ## Tech Stack
 - Backend: NestJS, Prisma v7 (https://www.prisma.io/docs/guides/frameworks/nestjs), PostgreSQL
   - Rate Limiting: @nestjs/throttler (https://docs.nestjs.com/security/rate-limiting)
+  - Auth: @nestjs/passport
+  - Caching: @nestjs/cache-manager (in-memory), then @keyv/redis (https://docs.nestjs.com/techniques/caching)
 - Frontend: React, Vite, TypeScript, Tailwind CSS, Axios
 - Local dev: Docker Compose (postgres)
 - Deployment: Cloudflare Pages (frontend) + AWS EC2/PM2 + RDS PostgreSQL
@@ -41,7 +43,6 @@ Subdomain separation rationale:
 - How: Static React build deployed from Git repo to Cloudflare Pages
 - Wiring: `VITE_API_BASE_URL` env var in Cloudflare dashboard → EC2 backend URL
 
-
 ### [2026-05-08] CORS: explicit origins only
 - NestJS main.ts origin: [FRONTEND_URL env var (url.wyzwyz.xyz in prod), 'http://localhost:7777']
 
@@ -66,3 +67,13 @@ Subdomain separation rationale:
 - `vite-env.d.ts` declares `ImportMetaEnv` shape — gives TS types and autocomplete for `VITE_*` vars.
 - `src/config/env.ts` is the single file that reads `import.meta.env`; throws at startup if required vars are missing.
 - Components use `import { env } from @config/env` only.
+
+### [2026-05-11] Authentication: JWT + Passport (local + Google OAuth)
+- Strategies: passport-local (email/password), passport-google-oauth20, passport-jwt
+- Token model: short-lived JWT, long-lived refresh token.
+
+### [2026-05-11] Caching: @nestjs/cache-manager - using Keyv and KeyvRedis
+- Redirect are write heavy and can definitely be cached.
+- Following guidelines here: https://docs.nestjs.com/techniques/caching.
+- Using default cachemanager and redis (currently hosted in same ec2 container)
+- Using promise coalescing to prevent cache stampede. Promises cached via ioredis.

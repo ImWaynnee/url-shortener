@@ -29,6 +29,9 @@ module.exports = [
       // Semicolons
       "semi": ["error", "always"],
 
+      // Commas
+      "@/comma-dangle": ["error", "never"],
+
       // Unused imports (plugin: unused-imports)
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [
@@ -55,10 +58,13 @@ module.exports = [
           "multiline": true,
           "consistent": true 
         },
-        "ImportDeclaration": "never",
-        "ExportDeclaration": {
+        "ImportDeclaration":  {
           "multiline": true,
-          "minProperties": 3 
+          "consistent": true 
+        },
+        "ExportDeclaration":  {
+          "multiline": true,
+          "consistent": true 
         },
       }],
       "@stylistic/object-property-newline": ["error", { allowAllPropertiesOnSameLine: false }],
@@ -68,6 +74,7 @@ module.exports = [
 
       // Whitespace
       "no-irregular-whitespace": "error",
+      "object-curly-spacing": ["error", "always"],
       "@stylistic/no-multi-spaces": "error",
       "@stylistic/no-multiple-empty-lines": ["error", {
         max: 1,
@@ -82,11 +89,12 @@ module.exports = [
       "no-restricted-imports": ["error", {
         "patterns": [{
           "group": ["./*", "../*"],
-          "message": "Use path aliases (@src/, @modules/, @prisma/, @config/, @guards/) instead of relative imports. Add into tsconfig.json paths if needed.",
+          "message": "Use path aliases (@src/, @modules/, @config/, @guards/) instead of relative imports. Add into tsconfig.json paths if needed.",
         }],
       }],
 
       // TypeScript
+      "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": "off", // handled by unused-imports
     },
@@ -109,6 +117,14 @@ module.exports = [
           "multiline": true,
           "consistent": true 
         },
+        "ImportDeclaration": {
+          "multiline": true,
+          "consistent": true 
+        },
+        "ExportDeclaration": {
+          "multiline": true,
+          "consistent": true 
+        }
       }],
       "@stylistic/object-property-newline": ["error", { allowAllPropertiesOnSameLine: false }],
       "no-irregular-whitespace": "error",

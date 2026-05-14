@@ -3,18 +3,121 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
-  moduleFormat = "cjs"
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "cjs"
   importFileExtension = ""
+  previewFeatures     = ["partialIndexes"]
+}
+
+model UserAuthProvider {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  user           User      @relation("UserAuthProviders", fields: [userId], references: [id])
+  provider       String    @map("provider")
+  providerUserId String?   @map("provider_user_id")
+  secret         String?   @map("secret")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime? @updatedAt @map("updated_at")
+
+  @@unique([provider, providerUserId], name: "uq_provider_provider_user_id")
+  @@index([userId], name: "idx_user_auth_providers_user_id")
+  @@map("user_auth_providers")
+}
+
+model UserRefreshToken {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  user       User      @relation("UserRefreshTokens", fields: [userId], references: [id])
+  tokenHash  String    @unique @map("token_hash")
+  deviceInfo String    @map("device_info")
+  ipAddress  String    @map("ip_address")
+  expiresAt  DateTime  @map("expires_at")
+  isRevoked  Boolean   @default(false) @map("is_revoked")
+  revokedAt  DateTime? @map("revoked_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([expiresAt], name: "idx_refresh_tokens_expires_at")
+  @@index([isRevoked], name: "idx_refresh_tokens_is_revoked")
+  @@index([userId], name: "idx_refresh_tokens_user_id")
+  @@map("user_refresh_tokens")
+}
+
+model UrlStat {
+  id             BigInt    @id @default(autoincrement())
+  urlId          BigInt    @map("url_id")
+  url            Url       @relation("UrlStatsMap", fields: [urlId], references: [id])
+  totalClicks    Int       @default(0) @map("total_clicks")
+  clicksSyncedAt DateTime  @default(now()) @map("clicks_synced_at")
+  lastClickedAt  DateTime? @updatedAt @map("last_clicked_at")
+
+  @@index([urlId], name: "idx_url_stats_url_id")
+  @@map("url_stats")
+}
+
+model UrlClick {
+  id            BigInt         @id @default(autoincrement())
+  urlId         BigInt         @map("url_id")
+  url           Url            @relation("UrlClicksMap", fields: [urlId], references: [id])
+  destinationId BigInt         @map("destination_id")
+  destination   UrlDestination @relation("UrlClicksDestinationMap", fields: [destinationId], references: [id])
+  ipAddress     String?        @map("ip_address")
+  userAgent     String?        @map("user_agent")
+  referrer      String?        @map("referrer")
+  createdAt     DateTime       @default(now()) @map("created_at")
+
+  @@index([urlId], name: "idx_url_clicks_url_id")
+  @@index([destinationId], name: "idx_url_clicks_destination_id")
+  @@index([createdAt(sort: Desc)], name: "idx_url_clicks_created_at_desc")
+  @@map("url_clicks")
+}
+
+model UrlDestination {
+  id             BigInt    @id @default(autoincrement())
+  urlId          BigInt    @map("url_id")
+  url            Url       @relation("UrlDestinationsMap", fields: [urlId], references: [id])
+  destinationUrl String    @map("destination_url")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime? @updatedAt @map("updated_at")
+
+  urlClicks UrlClick[] @relation("UrlClicksDestinationMap")
+
+  @@index([urlId], name: "idx_url_destinations_url_id")
+  @@index([urlId, createdAt(sort: Desc)], name: "idx_url_destinations_url_id_created_at_desc")
+  @@map("url_destinations")
+}
+
+model User {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  email             String    @unique
+  fullName          String?   @map("full_name")
+  lastLoginAt       DateTime? @map("last_login_at")
+  lastLoginProvider String?   @map("last_login_provider")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime? @updatedAt @map("updated_at")
+
+  createdUrls   Url[]              @relation("UserCreatedUrls")
+  authProviders UserAuthProvider[] @relation("UserAuthProviders")
+  refreshTokens UserRefreshToken[] @relation("UserRefreshTokens")
+
+  @@map("users")
 }
 
 model Url {
-  id            BigInt   @id @default(autoincrement())
-  shortUrl      String   @unique @db.VarChar(7) @map("short_url")
-  originalUrl   String   @map("original_url")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id          BigInt    @id @default(autoincrement())
+  shortUrl    String    @unique @map("short_url") @db.VarChar(7)
+  createdById String    @default(dbgenerated("'00000000-0000-0000-0000-000000000001'::uuid")) @map("created_by") @db.Uuid
+  createdBy   User      @relation("UserCreatedUrls", fields: [createdById], references: [id])
+  comments    String?   @map("comments")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  expiresAt   DateTime? @map("expires_at")
 
+  urlStats        UrlStat[]        @relation("UrlStatsMap")
+  urlClicks       UrlClick[]       @relation("UrlClicksMap")
+  urlDestinations UrlDestination[] @relation("UrlDestinationsMap")
+
+  @@index([createdById], name: "idx_urls_created_by")
   @@map("urls")
 }

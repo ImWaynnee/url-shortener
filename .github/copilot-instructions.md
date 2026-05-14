@@ -10,7 +10,7 @@
 - Backend build docker container in dev: `pnpm dev:backend`.
 - Backend tests: `pnpm --filter backend test`.
 - Frontend dev server: `pnpm dev:frontend`.
-- Create database migration if schema changes: `pnpm --filter backend migrate:dev`.
+- Create database migration if schema changes: `pnpm --filter backend prisma:migrate`.
 </BuildInstructions>
 
 # Memory Rule

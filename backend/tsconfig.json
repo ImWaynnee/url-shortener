@@ -7,9 +7,12 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "useDefineForClassFields": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "declaration": true,
     "removeComments": true,
+    "strictNullChecks": true,
     "sourceMap": true,
     "incremental": true,
     "rootDir": "src",
@@ -17,10 +20,11 @@
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "paths": {
       "@src/*": ["./src/*"],
+      "@common/*": ["./src/common/*"],
       "@modules/*": ["./src/modules/*"],
-      "@prisma/*": ["./src/prisma/*"],
       "@config/*": ["./src/config/*"],
-      "@guards/*": ["./src/common/guards/*"]
+      "@guards/*": ["./src/common/guards/*"],
+      "@factories/*": ["./src/test/factories/*"]
     }
   },
   "watchOptions": {
