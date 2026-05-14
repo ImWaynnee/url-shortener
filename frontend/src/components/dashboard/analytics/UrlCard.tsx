@@ -254,7 +254,10 @@ export function UrlCard({ url, index, onUpdated, showToast }: UrlCardProps) {
               </button>
             </div>
           ) : (
-            <p className="text-sm text-gray-700 truncate mt-1.5" title={url.destinationUrl}>
+            <p
+              className="text-sm text-gray-700 truncate mt-1.5 max-w-xs inline-block"
+              title={url.destinationUrl}
+            >
               {url.destinationUrl}
             </p>
           )}
