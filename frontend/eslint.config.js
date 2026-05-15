@@ -81,6 +81,7 @@ module.exports = [
       "object-curly-spacing": ["error", "always"],
       "@stylistic/no-multi-spaces": "error",
       "@stylistic/no-multiple-empty-lines": ["error", { max: 1, maxBOF: 0, maxEOF: 1 }],
+      "newline-per-chained-call": ["error", { "ignoreChainWithDepth": 2 }],
 
       // Misc
       "no-useless-escape": "warn",

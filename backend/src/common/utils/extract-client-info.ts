@@ -17,7 +17,7 @@ export function extractClientInfo(req: Request): ClientInfo {
     (req.headers['x-real-ip'] as string | undefined) ||
     (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0].trim() ||
     req.ip;
-  
+
   const referrer = (req.headers['referer'] as string | undefined) ?? null;
 
   if (!deviceInfo || !ipAddress) {

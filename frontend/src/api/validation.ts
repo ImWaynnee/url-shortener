@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
-export const commentSchema = z.string().trim().min(0).max(100, 'Comment must be 100 characters or less');
+export const commentSchema = z.string().trim()
+  .min(0)
+  .max(100, 'Comment must be 100 characters or less');
 export const urlSchema = z.string().refine(
   (val) => {
     // Accepts URLs with or without scheme (http/https), e.g., www.google.com, https://google.com
