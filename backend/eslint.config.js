@@ -81,6 +81,7 @@ module.exports = [
         maxBOF: 0,
         maxEOF: 1 
       }],
+      "newline-per-chained-call": ["error", { "ignoreChainWithDepth": 2 }],
 
       // Misc
       "no-useless-escape": "warn",
@@ -134,6 +135,7 @@ module.exports = [
         maxBOF: 0,
         maxEOF: 1 
       }],
+      "newline-per-chained-call": ["error", { "ignoreChainWithDepth": 2 }],
       "no-useless-escape": "warn",
     },
   },

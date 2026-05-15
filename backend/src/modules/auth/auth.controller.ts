@@ -6,10 +6,10 @@ import { RefreshRequestBody } from '@modules/auth/dto/refresh.request.dto';
 import { RegisterRequestBody } from '@modules/auth/dto/register.request.dto';
 import { GoogleAuthGuard, GoogleCallbackGuard } from '@modules/auth/guards/google-auth.guard';
 import { GoogleOAuthEnabledGuard } from '@modules/auth/guards/google-oauth-enabled.guard';
+import { LocalAuthGuard } from '@modules/auth/guards/local-auth.guard';
 import { JwtUser } from '@modules/auth/interfaces/jwt.interface';
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AuthGuard } from '@nestjs/passport';
 import type { UserModel } from '@src/generated/prisma/models/User';
 import type { Request, Response } from 'express';
 
@@ -25,7 +25,7 @@ export class AuthController {
     return this.authService.register(registrationData, extractClientInfo(req));
   }
 
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Req() req: Request, @Body() _loginData: LoginRequestBody) {
     return this.authService.login(req.user as UserModel, extractClientInfo(req));

@@ -13,12 +13,22 @@ function buildRequest(overrides: RequestOverrides = {}): Request {
   const headers: Record<string, string> = {};
 
   const userAgent = 'userAgent' in overrides ? overrides.userAgent : 'Mozilla/5.0';
-  if (userAgent !== undefined) headers['user-agent'] = userAgent;
 
-  if (overrides.xRealIp !== undefined) headers['x-real-ip'] = overrides.xRealIp;
-  if (overrides.xForwardedFor !== undefined) headers['x-forwarded-for'] = overrides.xForwardedFor;
+  if (userAgent !== undefined) {
+    headers['user-agent'] = userAgent;
+  }
 
-  const ip = 'ip' in overrides ? overrides.ip : '127.0.0.1';
+  if (overrides.xRealIp !== undefined) {
+    headers['x-real-ip'] = overrides.xRealIp;
+  }
+
+  if (overrides.xForwardedFor !== undefined) {
+    headers['x-forwarded-for'] = overrides.xForwardedFor;
+  }
+
+  const ip = 'ip' in overrides 
+    ? overrides.ip 
+    : '127.0.0.1';
 
   return {
     headers,
@@ -77,7 +87,7 @@ describe('extractClientInfo', () => {
     it('throws BadRequestException when user-agent is missing', () => {
       const req = buildRequest({
         userAgent: undefined,
-        xRealIp: '1.2.3.4' 
+        xRealIp: '1.2.3.4'
       });
       expect(() => extractClientInfo(req)).toThrow(BadRequestException);
     });

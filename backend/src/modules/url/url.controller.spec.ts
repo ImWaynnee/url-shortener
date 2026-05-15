@@ -199,6 +199,13 @@ describe('UrlController', () => {
 
       expect(res.redirect).toHaveBeenCalledWith(302, `${MOCK_FRONTEND_URL}/missing-link?code=notfound`);
     });
+
+    it('should re-throw non-NotFoundException errors from getLinkedUrl', async () => {
+      const res = createMockResponse();
+      mockUrlService.getLinkedUrl.mockRejectedValue(new Error('Unexpected DB error'));
+
+      await expect(controller.redirect('abc1234', makeReq(), res)).rejects.toThrow('Unexpected DB error');
+    });
   });
 
   describe('GET /urls', () => {

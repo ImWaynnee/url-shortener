@@ -315,6 +315,34 @@ describe('RedisPubSubCoalescingService', () => {
       await expect(promise).resolves.toBe('final');
     });
 
+    it('should reject with "no result found" when "done" is received but resultKey is missing from Redis', async () => {
+      // 4 flushes needed: SET NX → sub.subscribe → subscribeChannel boundary → early-check GET
+      const promise = service.coalesce<string>('myKey', jest.fn());
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // redis.get still returns null (same as beforeEach) — handler is now registered
+      sub.emit('message', 'notify:myKey', 'done');
+
+      await expect(promise).rejects.toThrow('Coalescing: no result found for result:myKey');
+    });
+
+    it('should reject via finish catch when redis.get throws after receiving "done"', async () => {
+      // 4 flushes: handler registered + early-check completed with null before we change the mock
+      const promise = service.coalesce<string>('myKey', jest.fn());
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      redis.get.mockRejectedValue(new Error('redis read error'));
+      sub.emit('message', 'notify:myKey', 'done');
+
+      await expect(promise).rejects.toThrow('redis read error');
+    });
+
     it('should not settle twice when early-result and pub/sub notification both fire', async () => {
       // Early result is available immediately after subscribe
       redis.get.mockResolvedValue(makeSuccessPayload('early'));

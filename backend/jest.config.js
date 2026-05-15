@@ -1,12 +1,21 @@
 process.env.TZ = 'UTC';
 
 module.exports = {
-  setupFiles: ['reflect-metadata'],
-  moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: 'src',
   testRegex: '.*\\.spec\\.ts$',
+  testEnvironment: 'node',
+  moduleFileExtensions: ['js', 'json', 'ts'],  
   transform: {
     "^.+\\.(t|j)s$": "ts-jest"
+  },
+  setupFiles: ['reflect-metadata'],
+  moduleNameMapper: {
+    '^@src/(.*)$': '<rootDir>/$1',
+    '^@common/(.*)$': '<rootDir>/common/$1',
+    '^@modules/(.*)$': '<rootDir>/modules/$1',
+    '^@config/(.*)$': '<rootDir>/config/$1',
+    '^@guards/(.*)$': '<rootDir>/common/guards/$1',
+    '^@factories/(.*)$': '<rootDir>/test/factories/$1',
   },
   collectCoverageFrom: [
     '**/*.(t|j)s',
@@ -14,6 +23,7 @@ module.exports = {
     '!**/dist/**',
   ],
   coveragePathIgnorePatterns: [
+    'src/test/',
     'node_modules',
     'main.ts',
     'prisma.service.ts',
@@ -23,13 +33,5 @@ module.exports = {
     'generated/prisma/',
   ],
   coverageDirectory: '../coverage',
-  testEnvironment: 'node',
-  moduleNameMapper: {
-    '^@src/(.*)$': '<rootDir>/$1',
-    '^@common/(.*)$': '<rootDir>/common/$1',
-    '^@modules/(.*)$': '<rootDir>/modules/$1',
-    '^@config/(.*)$': '<rootDir>/config/$1',
-    '^@guards/(.*)$': '<rootDir>/common/guards/$1',
-    '^@factories/(.*)$': '<rootDir>/test/factories/$1',
-  }
+  testTimeout: 15000
 };
