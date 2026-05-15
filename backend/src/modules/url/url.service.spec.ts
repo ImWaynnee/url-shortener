@@ -202,6 +202,26 @@ describe('UrlService', () => {
       await expect(service.getLinkedUrl('notfound')).rejects.toThrow(NotFoundException);
     });
 
+    it('should use empty string and null fallbacks when url has no destinations', async () => {
+      const stubWithoutDests = buildUrlWithDestinations(
+        {
+          id: BigInt(1),
+          shortUrl: 'abc1234',
+          isActive: true,
+          expiresAt: null 
+        },
+        [] // no destinations
+      );
+
+      mockCacheManager.get.mockResolvedValue(undefined);
+      mockPrismaService.url.findUnique.mockResolvedValue(stubWithoutDests as never);
+
+      const result = await service.getLinkedUrl('abc1234');
+
+      expect(result.destinationUrl).toBe('');
+      expect(result.activeDestinationId).toBeNull();
+    });
+
     it('should return cache entry populated by a concurrent request inside the coalesced fetcher (rechecked path)', async () => {
       mockCacheManager.get
         .mockResolvedValueOnce(undefined) // outer miss
@@ -493,6 +513,76 @@ describe('UrlService', () => {
       );
 
       await expect(service.updateUrl('1', userId, {})).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should include comments and expiresAt in update data when present in body', async () => {
+      mockPrismaService.url.findUnique.mockResolvedValue(
+        buildUrl({
+          id: BigInt(1),
+          shortUrl: 'abc1234',
+          createdById: userId 
+        })
+      );
+      mockPrismaService.url.update.mockResolvedValue(buildWithStats() as never);
+
+      await service.updateUrl('1', userId, {
+        comments: 'my note',
+        expiresAt: '2030-01-01T00:00:00.000Z' 
+      });
+
+      expect(mockPrismaService.url.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            comments: 'my note',
+            expiresAt: '2030-01-01T00:00:00.000Z' 
+          })
+        })
+      );
+    });
+
+    it('should return empty destinationUrl and zero totalClicks when url has no destinations or stats', async () => {
+      mockPrismaService.url.findUnique.mockResolvedValue(
+        buildUrl({
+          id: BigInt(1),
+          shortUrl: 'abc1234',
+          createdById: userId 
+        })
+      );
+      mockPrismaService.url.update.mockResolvedValue({
+        ...buildUrl({
+          id: BigInt(1),
+          shortUrl: 'abc1234',
+          createdById: userId 
+        }),
+        urlStats: [],
+        urlDestinations: []
+      } as never);
+
+      const result = await service.updateUrl('1', userId, {});
+
+      expect(result.destinationUrl).toBe('');
+      expect(result.totalClicks).toBe(0);
+    });
+
+    it('should create urlDestination inside a transaction when destinationUrl is provided', async () => {
+      mockPrismaService.url.findUnique.mockResolvedValue(
+        buildUrl({
+          id: BigInt(1),
+          shortUrl: 'abc1234',
+          createdById: userId 
+        })
+      );
+      mockPrismaService.url.update.mockResolvedValue(buildWithStats() as never);
+
+      await service.updateUrl('1', userId, { destinationUrl: 'https://new-destination.com' });
+
+      expect(mockPrismaService.urlDestination.create).toHaveBeenCalledWith({
+        data: {
+          urlId: BigInt(1),
+          destinationUrl: 'https://new-destination.com'
+        }
+      });
+      expect(mockPrismaService.url.update).toHaveBeenCalledTimes(1);
     });
   });
 

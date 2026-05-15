@@ -38,6 +38,7 @@ services:
     environment:
       - NGINX_API_HOST=${NGINX_API_HOST}
       - NGINX_REDIRECT_HOST=${NGINX_REDIRECT_HOST}
+      - NGINX_FRONTEND_HOST=${NGINX_FRONTEND_HOST}
     depends_on:
       - backend
     networks:

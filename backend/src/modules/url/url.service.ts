@@ -150,6 +150,7 @@ export class UrlService {
         data: { totalClicks: { increment: 1 } }
       });
     });
+
   }
 
   async listUserUrls(userId: string, query: ListUrlsRequest): Promise<PaginatedResponse<UrlResponse>> {

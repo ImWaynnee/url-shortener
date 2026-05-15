@@ -123,6 +123,11 @@ export class UrlController {
     }
 
     res.redirect(302, entry.destinationUrl);
-    void this.urlService.recordClick(entry, req).catch(() => undefined);
+    try {
+      // This shouldnt block since we already redirected, should move this to a eventemitter/queue eventually.
+      await this.urlService.recordClick(entry, req);
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    } catch (_e) {
+    }
   }
 }

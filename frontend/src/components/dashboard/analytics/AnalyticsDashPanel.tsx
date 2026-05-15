@@ -148,6 +148,7 @@ export function AnalyticsDashPanel() {
               type="search"
               placeholder="Search by code, URL or comment…"
               value={searchInput}
+              maxLength={200}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && applySearch()}
               aria-label="Search URLs"

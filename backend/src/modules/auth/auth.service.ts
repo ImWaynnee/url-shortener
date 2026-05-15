@@ -142,7 +142,8 @@ export class AuthService {
   }
 
   async refreshTokens(token: string, clientInfo: ClientInfo): Promise<AuthTokenResponse> {
-    const tokenHash = createHash('sha256').update(token).digest('hex');
+    const tokenHash = createHash('sha256').update(token)
+      .digest('hex');
 
     const row = await this.prisma.userRefreshToken.findUnique({
       where: { tokenHash },
@@ -186,7 +187,8 @@ export class AuthService {
 
     // Rotate: revoke old token and issue a new pair atomically.
     const newRefreshToken = randomUUID();
-    const newHash = createHash('sha256').update(newRefreshToken).digest('hex');
+    const newHash = createHash('sha256').update(newRefreshToken)
+      .digest('hex');
 
     await this.prisma.$transaction(async (tx) => {
       await tx.userRefreshToken.update({
@@ -208,13 +210,20 @@ export class AuthService {
     });
 
     return {
-      accessToken: this.jwtService.sign({
-        sub: row.user.id,
-        email: row.user.email,
-        ...(row.user.fullName ? { fullName: row.user.fullName } : {})
-      }),
+      accessToken: this.jwtService.sign(
+        {
+          sub: row.user.id,
+          email: row.user.email,
+          ...(row.user.fullName ? { fullName: row.user.fullName } : {})
+        },
+        { expiresIn: this.accessTokenExpiresIn }
+      ),
       refreshToken: newRefreshToken
     };
+  }
+
+  private get accessTokenExpiresIn(): number {
+    return parseInt(this.configService.getOrThrow<string>('JWT_EXPIRATION'), 10);
   }
 
   private get refreshTokenExpiresAt(): Date {
@@ -228,7 +237,8 @@ export class AuthService {
     clientInfo: ClientInfo
   ): Promise<AuthTokenResponse> {
     const refreshToken = randomUUID();
-    const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
+    const tokenHash = createHash('sha256').update(refreshToken)
+      .digest('hex');
 
     await this.prisma.userRefreshToken.create({
       data: {
@@ -241,11 +251,14 @@ export class AuthService {
     });
 
     return {
-      accessToken: this.jwtService.sign({
-        sub: user.id,
-        email: user.email,
-        ...(user.fullName ? { fullName: user.fullName } : {})
-      }),
+      accessToken: this.jwtService.sign(
+        {
+          sub: user.id,
+          email: user.email,
+          ...(user.fullName ? { fullName: user.fullName } : {})
+        },
+        { expiresIn: this.accessTokenExpiresIn }
+      ),
       refreshToken: refreshToken
     };
   }

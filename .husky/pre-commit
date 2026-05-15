@@ -1,3 +1,4 @@
+# Lint files
 pnpm lint-staged
 
 # Update sitemap lastmod if any frontend files are staged
@@ -11,3 +12,10 @@ if git diff --cached --name-only | grep -q "^frontend/"; then
   "
   git add frontend/public/sitemap.xml
 fi
+
+# Run spec tests
+pnpm --filter backend test -- --watchAll=false --bail
+
+
+# Run integration tests
+pnpm --filter backend test:integration

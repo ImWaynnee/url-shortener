@@ -1,4 +1,5 @@
-import { IsBoolean, IsISO8601, IsOptional, IsString, IsUrl, MaxLength, ValidateIf } from 'class-validator';
+import { IsISO8601WithTZandTime } from '@src/common/validators/datetime';
+import { IsBoolean, IsOptional, IsString, IsUrl, MaxLength, ValidateIf } from 'class-validator';
 
 export class UpdateUrlRequest {
   @IsOptional()
@@ -13,7 +14,9 @@ export class UpdateUrlRequest {
 
   @IsOptional()
   @ValidateIf((_, value) => value !== null)
-  @IsISO8601({ strict: true })
+  @IsISO8601WithTZandTime({
+    message: 'expiresAt must be a valid ISO 8601 datetime in UTC (e.g., 2024-01-01T12:00:00Z)' 
+  })
   expiresAt?: string | null;
 
   @IsOptional()

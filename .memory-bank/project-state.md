@@ -73,7 +73,11 @@ Subdomain separation rationale:
 - Token model: short-lived JWT, long-lived refresh token.
 
 ### [2026-05-11] Caching: @nestjs/cache-manager - using Keyv and KeyvRedis
-- Redirect are write heavy and can definitely be cached.
 - Following guidelines here: https://docs.nestjs.com/techniques/caching.
 - Using default cachemanager and redis (currently hosted in same ec2 container)
 - Using promise coalescing to prevent cache stampede. Promises cached via ioredis.
+
+### [2026-05-14] Integration Tests 
+- Set up using testcontainers and supertest, suites should be able to run concurrently. Use `jest.integration.config.js` for these.
+- Integration tests should cover all controller routes, cover all valid/unhappy paths, and assert DB state for mutations.
+- Note we didn't write failing test cases first for the first iteration, moving forward with any new features, bug fixes, refactoring, behavior changes, we must determine tests first to guide logic.
