@@ -10,8 +10,13 @@ import Redis from 'ioredis';
     {
       provide: COALESCING_REDIS_CLIENT,
       inject: [ConfigService],
-      useFactory: (config: ConfigService) =>
-        new Redis(config.getOrThrow<string>('REDIS_URL'))
+      useFactory: (config: ConfigService) => {
+        const client = new Redis(config.getOrThrow<string>('REDIS_URL'));
+        // Without a listener, ioredis 'error' events become uncaught exceptions
+        // that crash the Jest worker. Lifecycle cleanup happens in onModuleDestroy.
+        client.on('error', () => {});
+        return client;
+      }
     },
     {
       provide: COALESCING_SERVICE,
