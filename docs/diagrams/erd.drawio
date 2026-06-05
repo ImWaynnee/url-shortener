@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="erd" name="ERD">
-        <mxGraphModel dx="2277" dy="1252" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+        <mxGraphModel dx="3209" dy="1265" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -995,7 +995,7 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="277" value="url_destinations" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=14;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-320" y="435" width="420" height="240" as="geometry"/>
+                    <mxGeometry x="-320" y="435" width="420" height="210" as="geometry"/>
                 </mxCell>
                 <mxCell id="278" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;html=1;" parent="277" vertex="1">
                     <mxGeometry y="30" width="420" height="30" as="geometry"/>
@@ -1109,36 +1109,8 @@
                         <mxRectangle width="100" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="302" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=0;html=1;" parent="277" vertex="1">
-                    <mxGeometry y="150" width="420" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="303" value="" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;overflow=hidden;html=1;" parent="302" vertex="1">
-                    <mxGeometry width="50" height="30" as="geometry">
-                        <mxRectangle width="50" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="304" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;overflow=hidden;html=1;" parent="302" vertex="1">
-                    <mxGeometry x="50" width="50" height="30" as="geometry">
-                        <mxRectangle width="50" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="305" value="is_active" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;overflow=hidden;html=1;" parent="302" vertex="1">
-                    <mxGeometry x="100" width="140" height="30" as="geometry">
-                        <mxRectangle width="140" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="306" value="TEXT" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;overflow=hidden;html=1;" parent="302" vertex="1">
-                    <mxGeometry x="240" width="80" height="30" as="geometry">
-                        <mxRectangle width="80" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="307" value="default true" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;overflow=hidden;fontSize=10;html=1;" parent="302" vertex="1">
-                    <mxGeometry x="320" width="100" height="30" as="geometry">
-                        <mxRectangle width="100" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
                 <mxCell id="314" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=0;html=1;" parent="277" vertex="1">
-                    <mxGeometry y="180" width="420" height="30" as="geometry"/>
+                    <mxGeometry y="150" width="420" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="315" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;overflow=hidden;html=1;" parent="314" vertex="1">
                     <mxGeometry width="50" height="30" as="geometry">
@@ -1166,7 +1138,7 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="444" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=0;html=1;" parent="277" vertex="1">
-                    <mxGeometry y="210" width="420" height="30" as="geometry"/>
+                    <mxGeometry y="180" width="420" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="445" value="x" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;overflow=hidden;html=1;" parent="444" vertex="1">
                     <mxGeometry width="50" height="30" as="geometry">
@@ -1209,8 +1181,8 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="328" value="Indexes&lt;br&gt;- url_destinations(url_id, is_active)" style="text;align=left;verticalAlign=top;spacingLeft=8;fillColor=#ffe6cc;strokeColor=#d6b656;rounded=1;fontSize=12;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-320" y="720" width="420" height="80" as="geometry"/>
+                <mxCell id="328" value="Indexes&lt;br&gt;- url_destinations(url_id, created_at)" style="text;align=left;verticalAlign=top;spacingLeft=8;fillColor=#ffe6cc;strokeColor=#d6b656;rounded=1;fontSize=12;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-320" y="670" width="420" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="329" value="Indexes&lt;br&gt;&lt;div&gt;- urls.created_at DESC&lt;/div&gt;" style="text;align=left;verticalAlign=top;spacingLeft=8;fillColor=#ffe6cc;strokeColor=#d6b656;rounded=1;fontSize=12;html=1;" parent="1" vertex="1">
                     <mxGeometry x="-320" y="310" width="420" height="80" as="geometry"/>

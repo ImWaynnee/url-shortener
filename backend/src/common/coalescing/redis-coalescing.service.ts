@@ -55,16 +55,18 @@ implements ICoalescingService, OnModuleInit, OnModuleDestroy
 
   onModuleInit() {
     this.sub = this.redis.duplicate();
+    this.sub.on('error', () => {});
     this.sub.on('message', (channel: string, msg: string) =>
       this.emitter.emit(channel, msg)
     );
   }
 
-  async onModuleDestroy() {
-    // Quit the subscriber connection first, then the primary client.
-    // Guard for the case where onModuleInit never ran (e.g. in tests).
-    if (this.sub) await this.sub.quit();
-    await this.redis.quit();
+  onModuleDestroy() {
+    // disconnect() is immediate: it closes the socket without waiting for a
+    // QUIT acknowledgment, so it never hangs when the connection is still
+    // being established (e.g. in fast tests where teardown races init).
+    if (this.sub) this.sub.disconnect();
+    this.redis.disconnect();
   }
 
   async coalesce<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
