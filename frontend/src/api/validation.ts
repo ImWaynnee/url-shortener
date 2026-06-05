@@ -3,16 +3,22 @@ import { z } from 'zod';
 export const commentSchema = z.string().trim()
   .min(0)
   .max(100, 'Comment must be 100 characters or less');
+function isHttpUrl(val: string): boolean {
+  try {
+    const url = new URL(val);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export const urlSchema = z.string().refine(
   (val) => {
-    // Accepts URLs with or without scheme (http/https), e.g., www.google.com, https://google.com
-    // Basic regex: must have at least one dot and a valid domain part
-    // Optionally starts with http(s)://
-    return /^((https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,})(:[0-9]+)?(\/.*)?$/.test(val.trim());
+    const trimmed = val.trim();
+    const withScheme = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    return isHttpUrl(withScheme);
   },
-  {
-    message: 'Must be a valid URL'
-  }
+  { message: 'Must be a valid URL' }
 );
 
 export const expirySchema = z.union([

@@ -16,18 +16,18 @@ function makeRedisMock() {
   const sub = new EventEmitter() as EventEmitter & {
     subscribe: jest.Mock;
     unsubscribe: jest.Mock;
-    quit: jest.Mock;
+    disconnect: jest.Mock;
   };
   sub.subscribe = jest.fn().mockResolvedValue(1);
   sub.unsubscribe = jest.fn().mockResolvedValue(0);
-  sub.quit = jest.fn().mockResolvedValue('OK');
+  sub.disconnect = jest.fn();
 
   const redis = {
     set: jest.fn(),
     get: jest.fn(),
     del: jest.fn(),
     publish: jest.fn().mockResolvedValue(1),
-    quit: jest.fn().mockResolvedValue('OK'),
+    disconnect: jest.fn(),
     duplicate: jest.fn().mockReturnValue(sub)
   };
 
@@ -96,17 +96,17 @@ describe('RedisPubSubCoalescingService', () => {
   });
 
   describe('onModuleDestroy', () => {
-    it('should quit both the subscriber and primary Redis connections', async () => {
-      await service.onModuleDestroy();
-      expect(sub.quit).toHaveBeenCalledTimes(1);
-      expect(redis.quit).toHaveBeenCalledTimes(1);
+    it('should disconnect both the subscriber and primary Redis connections', () => {
+      service.onModuleDestroy();
+      expect(sub.disconnect).toHaveBeenCalledTimes(1);
+      expect(redis.disconnect).toHaveBeenCalledTimes(1);
     });
 
-    it('should not throw if onModuleInit never ran (sub is undefined)', async () => {
+    it('should not throw if onModuleInit never ran (sub is undefined)', () => {
       // Create a bare instance without calling onModuleInit
       const bare = new RedisPubSubCoalescingService(redis as never);
-      await expect(bare.onModuleDestroy()).resolves.not.toThrow();
-      expect(redis.quit).toHaveBeenCalledTimes(1);
+      expect(() => bare.onModuleDestroy()).not.toThrow();
+      expect(redis.disconnect).toHaveBeenCalledTimes(1);
     });
   });
 

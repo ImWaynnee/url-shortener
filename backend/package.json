@@ -72,6 +72,7 @@
     "@types/supertest": "^7.2.0",
     "@typescript-eslint/eslint-plugin": "^8.59.2",
     "@typescript-eslint/parser": "^8.59.2",
+    "autocannon": "^8.0.0",
     "cross-env": "^7.0.3",
     "dotenv-cli": "^8.0.0",
     "eslint": "^10.3.0",
